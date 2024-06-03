@@ -1,0 +1,548 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Управление личными финансами
+  contact:
+    name: ITAcademy
+    url: http://it-academy.by
+
+servers:
+  - url: http://{host}:{port}
+    description: custom server
+    variables:
+      host:
+        description: host name
+        default: localhost
+      port:
+        description: port value
+        default: "8080"
+
+tags:
+  - name: "Счета"
+    description: "Информация о Ваших личных счетах в которых вы храните ваши деньги"
+  - name: "Операции"
+    description: "Информация об операциях проводимых на ваших счетах"
+
+paths:
+  /api/v1/account:
+    post:
+      tags:
+        - "Счета"
+      summary: "Добавление нового счёта"
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAccount"
+      responses:
+        '201':
+          description: "Счёт добавлен в ваш профиль"
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+    get:
+      tags:
+        - "Счета"
+      summary: "Получить страницу счетов текущего пользователя"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы
+          required: false
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Размер страницы
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfAccount'
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+  /api/v1/account/{uuid}:
+    get:
+      tags:
+        - "Счета"
+      summary: "Получить информацию по счёту"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: "Идентификатор счёта"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+  /api/v1/account/{uuid}/dt_update/{dt_update}:
+    put:
+      tags:
+        - "Счета"
+      summary: Редактировать информацию о счёте
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: Идентификатор счёта в котором создаём операцию
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: dt_update
+          required: true
+          schema:
+            type: string
+            format: int64
+          description: Дата последнего обновления записи
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAccount"
+      responses:
+        '200':
+          description: "Счёт обновлён"
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+  /api/v1/account/{uuid}/operation:
+    post:
+      tags:
+        - "Операции"
+      summary: Добавление операции по счёту
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: Идентификатор счёта в котором создаём операцию
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: "#/components/requestBodies/CreateOperation"
+      responses:
+        '201':
+          description: "Операция добавлена к счёту"
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+    get:
+      tags:
+        - "Операции"
+      summary: Получить страницу операций по счёту
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: "Идентификатор счёта по которому получаем операции"
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы
+          required: false
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Размер страницы
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfOperation'
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+  /api/v1/account/{uuid}/operation/{uuid_operation}/dt_update/{dt_update}:
+    put:
+      tags:
+        - "Операции"
+      summary: Редактировать информацию об операции на счёте
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: Идентификатор счёта в котором редактируем операцию
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: uuid_operation
+          description: Идентификатор операции в котором редактируем
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: dt_update
+          required: true
+          schema:
+            type: string
+            format: int64
+          description: Дата последнего обновления записи
+      requestBody:
+        $ref: "#/components/requestBodies/CreateOperation"
+      responses:
+        '200':
+          description: "Операция изменена"
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+    delete:
+      tags:
+        - "Операции"
+      summary: Удалить операцию на счёте
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uuid
+          description: Идентификатор счёта в котором редактируем операцию
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: uuid_operation
+          description: Идентификатор операции в котором редактируем
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: dt_update
+          required: true
+          schema:
+            type: string
+            format: int64
+          description: Дата последнего обновления записи
+      responses:
+        '200':
+          description: "Операция удалена"
+        '400':
+          $ref: '#/components/responses/Bad_Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal_Server_Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Bad_Request:
+      description: Запрос некорректен. Сервер не может обработать запрос
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: array
+                items:
+                  $ref: '#/components/schemas/t_error_response'
+              - $ref: '#/components/schemas/t_structured_error_response'
+          examples:
+            t_error_response:
+              value:
+                - logref: error
+                  message:  Запрос содержит некорректные данные. Измените запрос и отправьте его ещё раз
+            t_structured_error_response:
+              value:
+                logref: structured_error
+                errors:
+                  - field: time_unit
+                    message: Поле должно быть положительным числом
+    Unauthorized:
+      description: Для выполнения запроса на данный адрес требуется передать токен авторизации
+    Forbidden:
+      description: Данному токену авторизации запрещено выполнять запроса на данный адрес
+    Internal_Server_Error:
+      description: Внутренняя ошибка сервера. Сервер не смог корректно обработать запрос
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/t_error_response'
+          example:
+            - logref: error
+              message:  Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору
+  requestBodies:
+    CreateAccount:
+      description: Тело для создания Счёта
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Account'
+    CreateOperation:
+      description: Тело для создания операции по счёту
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Operation'
+  schemas:
+    Account:
+      type: object
+      description: Счёт
+      allOf:
+        - $ref: '#/components/schemas/t_base_essence'
+      properties:
+        title:
+          type: string
+          description: "Наименование счёта"
+        description:
+          type: string
+          description: "Описание счёта"
+        balance:
+          type: number
+          description: "Текущий баланс"
+          readOnly: true
+        type:
+          type: string
+          description: |
+            Тип счёта:
+              * `CASH` - Наличные деньги
+              * `BANK_ACCOUNT` - Счёт в банке
+              * `BANK_DEPOSIT` - Депозит в банке
+          enum:
+            - "CASH"
+            - "BANK_ACCOUNT"
+            - "BANK_DEPOSIT"
+        currency:
+          type: string
+          format: uuid
+          description: Валюта счёта
+
+    Operation:
+      type: object
+      description: Операция над счётом
+      allOf:
+        - $ref: '#/components/schemas/t_base_essence'
+      properties:
+        date:
+          description: Дата\время операции (linux time)
+          type: integer
+          format: int64
+        description:
+          type: string
+          description: "Описание операции"
+        category:
+          type: string
+          format: uuid
+          description: Категория операции
+        value:
+          type: number
+          description: |
+            Сумма операции:
+              * Отрицательная сумма - списание
+              * Положительная - пополнение
+        currency:
+          type: string
+          format: uuid
+          description: Валюта операции
+
+    PageOfAccount:
+      type: object
+      description: Счета
+      allOf:
+        - $ref: '#/components/schemas/t_page'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+
+    PageOfOperation:
+      type: object
+      description: Операции
+      allOf:
+        - $ref: '#/components/schemas/t_page'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Operation'
+
+    t_base_essence:
+      type: object
+      description: Описание базовой сущности.
+      required:
+        - uuid
+        - dt_create
+        - dt_update
+      properties:
+        uuid:
+          description: Уникальный идентификатор сущности
+          type: string
+          format: uuid
+          readOnly: true
+        dt_create:
+          description: Дата создания сущности (linux time)
+          type: number
+          format: int64
+          readOnly: true
+        dt_update:
+          description: Дата последнего обновления сущности (linux time)
+          type: integer
+          format: int64
+          readOnly: true
+
+    t_page:
+      type: object
+      required:
+        - number
+        - size
+        - total_pages
+        - total_elements
+        - content
+        - first
+        - number_of_elements
+        - last
+      description: Страница
+      properties:
+        number:
+          description: Номер текущей запрошенной страницы
+          type: integer
+          format: int32
+        size:
+          description: Запрошенное количество элементов на страницу
+          type: integer
+          format: int32
+        total_pages:
+          description: Всего количество страниц учитывающих запрашиваемое количество элементов на страницу
+          type: integer
+          format: int32
+        total_elements:
+          description: Всего количество записей соответствующих запросу
+          type: integer
+          format: int64
+        first:
+          description: Признак является ли страница первой
+          type: boolean
+        number_of_elements:
+          description: Количество элементов на текущей странице
+          type: integer
+          format: int32
+        last:
+          description: Признак является ли страница последней
+          type: boolean
+
+    t_error_response:
+      type: object
+      description: Ошибка. Содержит общее описание ошибки
+      required:
+        - logref
+        - message
+      properties:
+        logref:
+          type: string
+          description: |
+            Тип ошибки (предназначено для машинной обработки):
+              * `error` - Признак что ошибка не привязана к полю
+          enum:
+            - "error"
+        message:
+          description: Сообщение об ошибке
+          type: string
+          example: Запрос содержит некорректные данные. Измените запрос и отправьте его ещё раз
+
+    t_structured_error_response:
+      type: object
+      description: Ошибка. Содержит описание ошибок с указанием на поле в теле или параметры в запросе
+      required:
+        - logref
+        - errors
+      properties:
+        logref:
+          type: string
+          description: |
+            Тип ошибки (предназначено для машинной обработки):
+              * `structured_error` - Признак что ошибка привязана к полю
+          enum:
+            - "structured_error"
+        errors:
+          description: Список ошибок
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Сообщение об ошибке
+                example: Должно быть положительным числом
+              field:
+                type: string
+                description: Наименование поля с которым связано сообщение
+                example: time_unit

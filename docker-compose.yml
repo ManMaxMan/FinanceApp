@@ -1,0 +1,32 @@
+name: finance
+
+services:
+  swagger:
+    build: swagger-ui
+    image: swagger-finance:1.0.0
+    ports:
+      - 81:8080
+    networks:
+      - finance-network
+  pg_db:
+    build: postgresql
+    image: postgresql-finance:1.0.0
+    environment:
+      POSTGRES_USER: finance_admin
+      POSTGRES_PASSWORD: 123
+    networks:
+      - finance-network
+  pgadmin:
+    build: pgadmin
+    image: pgadmin-finance:1.0.0
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@finance.com
+      PGADMIN_DEFAULT_PASSWORD: finance
+    ports:
+      - 82:80
+    networks:
+      - finance-network
+  
+
+networks:
+  finance-network:
