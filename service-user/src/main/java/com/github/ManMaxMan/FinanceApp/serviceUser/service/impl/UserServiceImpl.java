@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,7 +25,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserEntity create(UserEntity userEntity) {
-        userEntity.setUuid(UUID.randomUUID());
         return userRepository.saveAndFlush(userEntity);
     }
 
@@ -35,8 +35,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public UserEntity getByUUID(UUID uuid) {
-        return null;
+    public Optional<UserEntity> getByMail(String mail) {
+        return userRepository.findByMail(mail);
     }
 
 }

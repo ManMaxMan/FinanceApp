@@ -1,10 +1,9 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.controller.http.cabinet;
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.controller.converter.api.IConverter;
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserRegistrationDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.VerificationDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IRegistrationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,17 +12,15 @@ import org.springframework.web.bind.annotation.*;
 public class RegistrationController {
 
     private final IRegistrationService registrationService;
-    private final IConverter converter;
 
-    public RegistrationController(IRegistrationService registrationService, IConverter converter) {
+    public RegistrationController(IRegistrationService registrationService) {
         this.registrationService = registrationService;
-        this.converter = converter;
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<UserDTO> registration(@RequestBody UserRegistrationDTO registrationDTO) {
-        UserDTO userDTO = converter.convert(registrationService.registration(registrationDTO));
-        return ResponseEntity.status(200).body(userDTO);
+    public ResponseEntity<?> registration(@RequestBody UserRegistrationDTO registrationDTO) {
+        registrationService.registration(registrationDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/verification")

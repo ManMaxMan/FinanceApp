@@ -1,5 +1,8 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.config;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,21 +11,24 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 
 @Configuration
-public class MailConfig {
+@ConfigurationProperties(prefix = "spring.mail")
+@Getter
+@Setter
+public class SMTPServerConfig {
 
-    //private final static String HOST = "smtp.mail.ru";
-    //private final static Integer PORT = 587;
-    private final static String FROM = System.getenv("JavaSendingEmail");
-    private final static String PASSWORD = System.getenv("JavaSendingPassword");
+    private String host;
+    private String port;
+    private String username;
+    private String password;
 
     @Bean
     public JavaMailSender javaMailSender() {
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        //mailSender.setHost(HOST);
-        //mailSender.setPort(PORT);
-        mailSender.setUsername(FROM);
-        mailSender.setPassword(PASSWORD);
+        mailSender.setHost(getHost());
+        mailSender.setPort(Integer.parseInt(getPort()));
+        mailSender.setUsername(getUsername());
+        mailSender.setPassword(getPassword());
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");
@@ -31,6 +37,5 @@ public class MailConfig {
 
         return mailSender;
     }
-
 
 }

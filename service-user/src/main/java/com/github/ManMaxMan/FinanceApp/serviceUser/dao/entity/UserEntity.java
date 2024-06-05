@@ -33,10 +33,14 @@ public class UserEntity {
 
     private String password;
 
+    @OneToOne(mappedBy = "userEntity", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private VerificationEntity verificationEntity;
+
     public UserEntity() {
     }
 
-    public UserEntity(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String mail, String fio, EUserRole role, EUserStatus status, String password) {
+    public UserEntity(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String mail, String fio, EUserRole role, EUserStatus status, String password, VerificationEntity verificationEntity) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -45,6 +49,7 @@ public class UserEntity {
         this.role = role;
         this.status = status;
         this.password = password;
+        this.verificationEntity = verificationEntity;
     }
 
     public UUID getUuid() {
@@ -109,5 +114,14 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public VerificationEntity getVerificationEntity() {
+        return verificationEntity;
+    }
+
+    public void setVerificationEntity(VerificationEntity verificationEntity) {
+        verificationEntity.setUserEntity(this);
+        this.verificationEntity = verificationEntity;
     }
 }

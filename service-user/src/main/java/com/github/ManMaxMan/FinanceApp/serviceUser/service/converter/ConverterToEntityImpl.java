@@ -3,11 +3,11 @@ package com.github.ManMaxMan.FinanceApp.serviceUser.service.converter;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserRegistrationDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
-import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverter;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserConverterImpl implements IConverter {
+public class ConverterToEntityImpl implements IConverterToEntity {
     @Override
     public UserEntity convert(UserDTO item) {
         return null;

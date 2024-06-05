@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface IVerificationRepository extends JpaRepository<VerificationEntity, UUID> {
-    VerificationEntity findByUUID (UUID uuid);
+
 }

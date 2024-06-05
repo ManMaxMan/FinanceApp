@@ -40,6 +40,7 @@ CREATE TABLE app.verification
 (
     uuid uuid,
     verification_code character varying NOT NULL,
+    message_status character varying(50) NOT NULL,
     CONSTRAINT verification_uuid_pk PRIMARY KEY (uuid),
     CONSTRAINT verification_uuid_fk FOREIGN KEY (uuid)
         REFERENCES app.users (uuid) MATCH SIMPLE
