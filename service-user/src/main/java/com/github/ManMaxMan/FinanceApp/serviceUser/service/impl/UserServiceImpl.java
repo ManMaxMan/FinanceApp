@@ -1,6 +1,7 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl;
 
 
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EMessageStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.api.IUsersRepository;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
@@ -29,8 +30,9 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<UserEntity> getByStatus(EUserStatus userStatus) {
-        return userRepository.findByStatus(userStatus);
+    public List<UserEntity> getByUserStatusAndMessageStatus(EUserStatus userStatus,
+                                                            EMessageStatus messageStatus) {
+        return userRepository.findByStatusAndVerificationEntity_MessageStatus(userStatus, messageStatus);
     }
 
     @Override

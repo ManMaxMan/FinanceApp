@@ -1,18 +1,15 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.config;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "message")
+@ConfigurationProperties(prefix = "app.jwt")
 @Getter
 @Setter
-public class MessageConfig {
-    private String server;
-    private String subject;
-    private String username;
-    private String version;
+public class JWTProperty {
+    private String secret;
+    private String issuer;
 }

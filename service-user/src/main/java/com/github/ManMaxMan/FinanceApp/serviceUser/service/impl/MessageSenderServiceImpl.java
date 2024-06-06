@@ -20,10 +20,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class MessageSenderServiceImpl implements IMessageSenderService {
 
-    //private final static String EMAIL_FROM = "annatsurko2003@mail.ru";
-    //private final static String SUBJECT = "FinanceApp";
-
-
     private final IUserService userService;
     private final IVerificationService verificationService;
     private final JavaMailSender mailSender;
@@ -40,14 +36,14 @@ public class MessageSenderServiceImpl implements IMessageSenderService {
     @Override
     @Transactional
     public void sendingVerificationMessage(){
-        List<UserEntity> users = userService.getByStatus(EUserStatus.WAITING_ACTIVATION);
+        List<UserEntity> users = userService.
+                getByUserStatusAndMessageStatus(EUserStatus.WAITING_ACTIVATION, EMessageStatus.LOAD);
         users.forEach(user -> {
-            if (user.getVerificationEntity().getMessageStatus()==EMessageStatus.LOAD) {
-                String verificationCode = user.getVerificationEntity().getVerificationCode();
-                EMessageStatus messageStatus = send(verificationCode, user.getMail(), user.getFio());
-                user.getVerificationEntity().setMessageStatus(messageStatus);
-                verificationService.update(user.getVerificationEntity());
-            }
+            String verificationCode = user.getVerificationEntity().getVerificationCode();
+            EMessageStatus messageStatus = send(verificationCode, user.getMail(), user.getFio());
+            user.getVerificationEntity().setMessageStatus(messageStatus);
+            verificationService.update(user.getVerificationEntity());
+
         });
     }
 
@@ -58,8 +54,10 @@ public class MessageSenderServiceImpl implements IMessageSenderService {
         message.setTo(mailTo);
         message.setFrom(messageConfig.getUsername());
         message.setSubject(messageConfig.getSubject());
+
         message.setText(fio+ "! Перейдите по ссылке для подтверждения регистрации: " +
-                "http://"+messageConfig.getServer()+"/cabinet/verification?code=" + code + "&mail=" + mailTo);
+                "http://"+messageConfig.getServer()+"/api/"+messageConfig.getVersion()
+                +"/cabinet/verification?code=" + code + "&mail=" + mailTo);
 
         try {
             mailSender.send(message);

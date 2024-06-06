@@ -1,5 +1,9 @@
+project:
+  version: v1
+
 server:
   port: 8080
+  address: localhost
 
 spring:
   datasource:
@@ -13,9 +17,15 @@ spring:
     password: 1
 
 message:
-  server: localhost:${server.port}
+  server: ${server.address}:${server.port}
   username: ${spring.mail.username}
   subject: FinanceApp
+  version: ${project.version}
+
+app:
+  jwt:
+    secret: 1
+    issuer: FinanceApp
 
 
 

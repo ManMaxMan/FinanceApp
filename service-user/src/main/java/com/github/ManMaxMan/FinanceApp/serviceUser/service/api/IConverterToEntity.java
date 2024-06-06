@@ -5,6 +5,5 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserRegistrationDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 
 public interface IConverterToEntity {
-    UserEntity convert(UserDTO item);
     UserEntity convert(UserRegistrationDTO item);
 }

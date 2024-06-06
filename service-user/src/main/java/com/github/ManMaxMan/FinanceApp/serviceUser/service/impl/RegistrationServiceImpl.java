@@ -12,6 +12,8 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IRegistrationServ
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IVerificationService;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +33,12 @@ public class RegistrationServiceImpl implements IRegistrationService {
 
     private final IConverterToEntity converterToEntity;
     private final IUserService userService;
-    private final IVerificationService verificationService;
 
-    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, IVerificationService verificationService) {
+
+    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService) {
         this.converterToEntity=converterToEntity;
         this.userService = userService;
-        this.verificationService = verificationService;
     }
-
 
     @Override
     @Transactional
@@ -46,6 +46,10 @@ public class RegistrationServiceImpl implements IRegistrationService {
 
         if (registrationDTO.getPassword() == null || registrationDTO.getFio() == null ||
                 registrationDTO.getMail() == null) {
+            throw new IllegalArgumentException();
+        }
+
+        if (!EmailValidator.getInstance().isValid(registrationDTO.getMail())){
             throw new IllegalArgumentException();
         }
 

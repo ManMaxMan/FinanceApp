@@ -18,9 +18,9 @@ public class RegistrationController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody UserRegistrationDTO registrationDTO) {
+    public ResponseEntity<String> registration(@RequestBody UserRegistrationDTO registrationDTO) {
         registrationService.registration(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Пользователь зарегистрирован");
     }
 
     @GetMapping("/verification")
