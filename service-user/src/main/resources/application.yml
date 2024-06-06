@@ -27,5 +27,9 @@ app:
     secret: 1
     issuer: FinanceApp
 
+verify-code:
+  length: 25
+  letters: true
+  numbers: true
 
 

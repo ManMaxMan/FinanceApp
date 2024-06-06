@@ -1,6 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.converter;
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserAddUpdateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserRegistrationDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntity;
@@ -22,6 +22,19 @@ public class ConverterToEntityImpl implements IConverterToEntity {
         UserEntity userEntity = new UserEntity();
         userEntity.setMail(item.getMail());
         userEntity.setFio(item.getFio());
+        userEntity.setPassword(encoder.encode(item.getPassword()));
+
+        return userEntity;
+    }
+
+    @Override
+    public UserEntity convert(UserAddUpdateDTO item) {
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setMail(item.getMail());
+        userEntity.setFio(item.getFio());
+        userEntity.setRole(item.getRole());
+        userEntity.setStatus(item.getStatus());
         userEntity.setPassword(encoder.encode(item.getPassword()));
 
         return userEntity;

@@ -4,7 +4,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import lombok.*;
 
 import java.util.List;
-import java.util.function.Function;
+
 
 @Builder
 @NoArgsConstructor
@@ -13,8 +13,7 @@ import java.util.function.Function;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class PageOfUserDTO {
-
+public class PageOfUserEntityDTO {
     private Integer number;
 
     private Integer size;
@@ -29,6 +28,5 @@ public class PageOfUserDTO {
 
     private Boolean last;
 
-    private List<UserDTO> content;
-
+    private List<UserEntity> content;
 }

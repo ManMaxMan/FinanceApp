@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface IUsersRepository extends JpaRepository<UserEntity, UUID> {
     List<UserEntity> findByStatusAndVerificationEntity_MessageStatus (EUserStatus status, EMessageStatus messageStatus);
     Optional<UserEntity> findByMail(String mail);
+    Optional<UserEntity> findByUuid(UUID uuid);
 }

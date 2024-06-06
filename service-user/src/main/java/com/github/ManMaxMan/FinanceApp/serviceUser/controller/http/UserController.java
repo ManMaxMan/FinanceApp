@@ -1,51 +1,66 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.controller.http;
 
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.PageOfUserDTO;
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserCreateDTO;
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.controller.converter.ConverterToDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.*;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IManagementService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    public UserController() {
+    private final IManagementService managementService;
+    private final ConverterToDTO converterToDTO;
+
+    public UserController(IManagementService managementService, ConverterToDTO converterToDTO) {
+        this.managementService = managementService;
+        this.converterToDTO = converterToDTO;
     }
 
-    @PostMapping
-    public ResponseEntity<UserCreateDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
-
-        return ResponseEntity.status(201).body(userCreateDTO);
+    @PostMapping(produces = "application/json")
+    public ResponseEntity<?> createUser(@RequestBody UserAddUpdateDTO userCreateDTO) {
+        managementService.addUser(userCreateDTO);
+        return ResponseEntity.status(201).build();
     }
 
-    @GetMapping
-    public ResponseEntity<PageOfUserDTO> getPageUsers(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-                                                      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
-
-        PageOfUserDTO pageOfUserDTO = new PageOfUserDTO();
-
-        return ResponseEntity.ok(pageOfUserDTO);
-    }
-
-    @GetMapping("{uuid}")
+    @GetMapping(value = "/{uuid}", produces = "application/json")
     public ResponseEntity<UserDTO> getUserById(@PathVariable("uuid") UUID uuid) {
-        UserDTO userDTO = new UserDTO();
-
-
-        return ResponseEntity.ok(userDTO);
+        UserDTO userDTO = converterToDTO.convert(managementService.getUser(uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(userDTO);
     }
 
-    @PutMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<UserCreateDTO> updateUser(@PathVariable("uuid") UUID uuid,
-                                              @PathVariable("dt_update") Instant dtUpdate,
-                                              @RequestBody UserCreateDTO userCreateDTO) {
 
-        return ResponseEntity.ok(null);
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<PageOfUserDTO> getPageUsers
+            (@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+             @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
+
+        PageOfUserEntityDTO pageOfUserEntity = new PageOfUserEntityDTO();
+        pageOfUserEntity.setNumber(page);
+        pageOfUserEntity.setSize(size);
+
+        PageOfUserDTO pageOfUserDTO= converterToDTO.convertPage(managementService.generate(pageOfUserEntity));
+        return ResponseEntity.status(HttpStatus.OK).body(pageOfUserDTO);
+    }
+
+    @PutMapping(value = "/{uuid}/dt_update/{dt_update}", produces = "application/json")
+    public ResponseEntity<?> updateUser(@PathVariable("uuid") UUID uuid,
+                                                       @PathVariable("dt_update") LocalDateTime dtUpdate,
+                                                       @RequestBody UserAddUpdateDTO userAddUpdateDTO) {
+
+        UpdateDTO updateDTO = UpdateDTO.builder()
+                .uuid(uuid)
+                .dtUpdate(dtUpdate)
+                .userAddUpdateDTO(userAddUpdateDTO)
+                .build();
+        managementService.updateUser(updateDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

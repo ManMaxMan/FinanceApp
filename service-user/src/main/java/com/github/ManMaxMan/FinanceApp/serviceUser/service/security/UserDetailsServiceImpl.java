@@ -27,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (optional.isPresent()){
             return new User(optional.get().getMail(), optional.get().getPassword(), Collections.emptyList());
         }else {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("User not found");
         }
     }
 }

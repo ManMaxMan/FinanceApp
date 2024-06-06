@@ -10,10 +10,12 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.VerificationEntity
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IRegistrationService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
-import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IVerificationService;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.VerifyCodeConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,31 +28,30 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class RegistrationServiceImpl implements IRegistrationService {
 
-    private final static Integer CODE_LENGTH = 25;
-    private final static Boolean USE_LETTERS = true;
-    private final static Boolean USE_NUMBERS = true;
-
-
     private final IConverterToEntity converterToEntity;
     private final IUserService userService;
+    private final VerifyCodeConfig verifyCodeConfig;
+
+    private final static Logger logger = LogManager.getLogger();
 
 
-    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService) {
+    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, VerifyCodeConfig verifyCodeConfig) {
         this.converterToEntity=converterToEntity;
         this.userService = userService;
+        this.verifyCodeConfig = verifyCodeConfig;
     }
 
     @Override
     @Transactional
-    public UserEntity registration(UserRegistrationDTO registrationDTO) {
+    public void registration(UserRegistrationDTO registrationDTO) {
 
         if (registrationDTO.getPassword() == null || registrationDTO.getFio() == null ||
                 registrationDTO.getMail() == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Registration user has empty fields");
         }
 
         if (!EmailValidator.getInstance().isValid(registrationDTO.getMail())){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Registration user has invalid email address");
         }
 
         UserEntity userEntity = converterToEntity.convert(registrationDTO);
@@ -61,15 +62,17 @@ public class RegistrationServiceImpl implements IRegistrationService {
         userEntity.setRole(EUserRole.USER);
         userEntity.setStatus(EUserStatus.WAITING_ACTIVATION);
 
-        String code = RandomStringUtils.random(CODE_LENGTH, USE_LETTERS, USE_NUMBERS);
+        String code = RandomStringUtils.random(verifyCodeConfig.getLength(),
+                verifyCodeConfig.getLetters(), verifyCodeConfig.getNumbers());
         VerificationEntity verificationEntity = new VerificationEntity();
         verificationEntity.setVerificationCode(code);
         verificationEntity.setMessageStatus(EMessageStatus.LOAD);
         userEntity.setVerificationEntity(verificationEntity);
 
-        userEntity=userService.create(userEntity);
+        userService.create(userEntity);
 
-        return userEntity;
+        logger.log(Level.INFO, "Registration user successfully created");
+
     }
 
     @Override
@@ -79,21 +82,23 @@ public class RegistrationServiceImpl implements IRegistrationService {
         if(optional.isPresent()){
 
             if (optional.get().getStatus() != EUserStatus.WAITING_ACTIVATION) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Verification user not waiting activation");
             }
             if (optional.get().getVerificationEntity().getMessageStatus()!=EMessageStatus.OK) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Verification user suspicious! Verification message_status: "
+                        +optional.get().getVerificationEntity().getMessageStatus());
             }
 
             if(Objects.equals(optional.get().getVerificationEntity().getVerificationCode(),
                     verificationDTO.getVerificationCode())) {
                 optional.get().setStatus(EUserStatus.ACTIVATED);
                 userService.create(optional.get());
+                logger.log(Level.INFO, "Verification user successfully verified");
             }else {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Verification user present, but verification code is different");
             }
         }else {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Verification user has incorrect email address");
         }
     }
 }

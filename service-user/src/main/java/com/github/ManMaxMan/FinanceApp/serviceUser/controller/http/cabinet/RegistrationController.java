@@ -17,19 +17,19 @@ public class RegistrationController {
         this.registrationService = registrationService;
     }
 
-    @PostMapping("/registration")
-    public ResponseEntity<String> registration(@RequestBody UserRegistrationDTO registrationDTO) {
+    @PostMapping(value = "/registration", produces = "application/json")
+    public ResponseEntity<?> registration(@RequestBody UserRegistrationDTO registrationDTO) {
         registrationService.registration(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Пользователь зарегистрирован");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/verification")
-    public ResponseEntity<String> verification(@RequestParam("code") String code, @RequestParam("mail") String mail) {
+    @GetMapping(value = "/verification", produces = "application/json")
+    public ResponseEntity<?> verification(@RequestParam("code") String code, @RequestParam("mail") String mail) {
         VerificationDTO verificationDTO= VerificationDTO.builder()
                 .email(mail)
                 .verificationCode(code)
                 .build();
         registrationService.verification(verificationDTO);
-        return ResponseEntity.ok("Пользователь верифицирован");
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

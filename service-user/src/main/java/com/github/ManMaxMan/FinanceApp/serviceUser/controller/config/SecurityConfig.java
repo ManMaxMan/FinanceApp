@@ -43,7 +43,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/cabinet/login", "/api/cabinet/registration", "/api/cabinet/verification", "/api/users/**").permitAll()
                 .anyRequest().authenticated());*/
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/cabinet/login", "/cabinet/registration", "/cabinet/verification", "/users/**").permitAll()
+                //.requestMatchers("/cabinet/login", "/cabinet/registration", "/cabinet/verification", "/users/**").permitAll()
+                .requestMatchers("/cabinet/login", "/cabinet/registration", "/cabinet/verification").permitAll()
+
                 .anyRequest().authenticated());
 
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

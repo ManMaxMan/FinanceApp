@@ -7,6 +7,9 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IMessageSenderSer
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IVerificationService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.MessageConfig;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,6 +27,8 @@ public class MessageSenderServiceImpl implements IMessageSenderService {
     private final IVerificationService verificationService;
     private final JavaMailSender mailSender;
     private final MessageConfig messageConfig;
+
+    private final static Logger logger = LogManager.getLogger();
 
     public MessageSenderServiceImpl(IUserService userService, IVerificationService verificationService, JavaMailSender mailSender, MessageConfig messageConfig) {
         this.userService = userService;
@@ -61,8 +66,10 @@ public class MessageSenderServiceImpl implements IMessageSenderService {
 
         try {
             mailSender.send(message);
+            logger.log(Level.INFO, "Verification message sent to "+mailTo);
             return EMessageStatus.OK;
         }catch (MailException exception){
+            logger.log(Level.ERROR, "Verification message don't send to "+mailTo);
             return EMessageStatus.ERROR;
         }
     }

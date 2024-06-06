@@ -6,6 +6,8 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.api.IUsersRepository;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +27,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public UserEntity create(UserEntity userEntity) {
-        return userRepository.saveAndFlush(userEntity);
+    public void create(UserEntity userEntity) {
+        userRepository.saveAndFlush(userEntity);
     }
 
     @Override
@@ -40,5 +42,16 @@ public class UserServiceImpl implements IUserService {
     public Optional<UserEntity> getByMail(String mail) {
         return userRepository.findByMail(mail);
     }
+
+    @Override
+    public Optional<UserEntity> getByUuid(UUID uuid) {
+        return userRepository.findByUuid(uuid);
+    }
+
+    @Override
+    public Page<UserEntity> getAll(Integer page, Integer size) {
+        return userRepository.findAll(PageRequest.of(page, size));
+    }
+
 
 }
