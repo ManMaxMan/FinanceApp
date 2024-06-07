@@ -53,5 +53,10 @@ public class UserServiceImpl implements IUserService {
         return userRepository.findAll(PageRequest.of(page, size));
     }
 
+    @Override
+    public Boolean isExist(String mail) {
+        return userRepository.existsByMail(mail);
+    }
+
 
 }

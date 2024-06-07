@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceUser.service.config;
+package com.github.ManMaxMan.FinanceApp.serviceUser.controller.config;
 
 import lombok.Getter;
 import lombok.Setter;

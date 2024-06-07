@@ -1,6 +1,5 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl;
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.PageOfUserDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.PageOfUserEntityDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UpdateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserAddUpdateDTO;
@@ -20,11 +19,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -69,6 +66,10 @@ public class ManagementServiceImpl implements IManagementService {
 
         if (!EnumUtils.isValidEnum(EUserRole.class, userAdd.getRole().toString())){
             throw new IllegalArgumentException("Add user has invalid role");
+        }
+
+        if (userService.isExist(userAdd.getMail())) {
+            throw new IllegalArgumentException("Add user has existing user");
         }
 
         UserEntity userEntity = converterToEntity.convert(userAdd);
@@ -216,6 +217,7 @@ public class ManagementServiceImpl implements IManagementService {
     }
 
     @Override
+    @Transactional
     public PageOfUserEntityDTO generate(PageOfUserEntityDTO pageOfUser) {
         Page<UserEntity> pageUsers = userService.getAll(pageOfUser.getNumber(),
                 pageOfUser.getSize());

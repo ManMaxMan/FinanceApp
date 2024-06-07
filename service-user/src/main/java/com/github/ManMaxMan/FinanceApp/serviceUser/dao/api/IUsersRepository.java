@@ -4,6 +4,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EMessageStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,4 +14,5 @@ public interface IUsersRepository extends JpaRepository<UserEntity, UUID> {
     List<UserEntity> findByStatusAndVerificationEntity_MessageStatus (EUserStatus status, EMessageStatus messageStatus);
     Optional<UserEntity> findByMail(String mail);
     Optional<UserEntity> findByUuid(UUID uuid);
+    Boolean existsByMail (String mail);
 }

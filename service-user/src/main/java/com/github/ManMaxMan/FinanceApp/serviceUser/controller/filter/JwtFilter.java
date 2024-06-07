@@ -13,46 +13,59 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+
+import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 @Configuration
 @EnableWebSecurity
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtTokenHandler jwtTokenHandler;
+    private final JwtTokenHandler jwtHandler;
     private final UserDetailsServiceImpl userDetailsService;
 
     public JwtFilter(JwtTokenHandler jwtTokenHandler, UserDetailsServiceImpl userDetailsService) {
-        this.jwtTokenHandler = jwtTokenHandler;
+        this.jwtHandler = jwtTokenHandler;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String token = getToken(request);
-        if (token != null && jwtTokenHandler.validate(token)) {
-            String email = jwtTokenHandler.getMail(token);
-            Authentication authentication = createAuthentication(email);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        filterChain.doFilter(request, response);
-    }
-
-    private String getToken(HttpServletRequest request) {
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header != null && header.startsWith("Bearer ")) {
-            return header.split(" ")[1].trim();
+        if (isEmpty(header) || !header.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
         }
-        return null;
-    }
 
-    private Authentication createAuthentication(String email) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
+        // Get jwt token and validate
+        final String token = header.split(" ")[1].trim();
+        if (!jwtHandler.validate(token)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
+        UserDetails userDetails = userDetailsService
+                .loadUserByUsername(jwtHandler.getMail(token));
+
+        UsernamePasswordAuthenticationToken
+                authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null,
+                userDetails == null ?
+                        List.of() : userDetails.getAuthorities()
+        );
+
+        authentication.setDetails(
+                new WebAuthenticationDetailsSource().buildDetails(request)
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        chain.doFilter(request, response);
+
+    }
 }

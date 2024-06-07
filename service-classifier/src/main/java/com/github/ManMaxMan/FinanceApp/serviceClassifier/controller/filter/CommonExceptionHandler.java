@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceUser.controller.filter;
+package com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

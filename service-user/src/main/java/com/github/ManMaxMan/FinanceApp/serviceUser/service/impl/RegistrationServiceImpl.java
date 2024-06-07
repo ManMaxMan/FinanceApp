@@ -54,6 +54,10 @@ public class RegistrationServiceImpl implements IRegistrationService {
             throw new IllegalArgumentException("Registration user has invalid email address");
         }
 
+        if (userService.isExist(registrationDTO.getMail())) {
+            throw new IllegalArgumentException("Registration user has existing user");
+        }
+
         UserEntity userEntity = converterToEntity.convert(registrationDTO);
         userEntity.setUuid(UUID.randomUUID());
         LocalDateTime dateTime = LocalDateTime.now();

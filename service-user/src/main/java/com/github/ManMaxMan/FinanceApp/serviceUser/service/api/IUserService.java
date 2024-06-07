@@ -16,5 +16,6 @@ public interface IUserService {
     Optional<UserEntity> getByMail(String mail);
     Optional<UserEntity> getByUuid (UUID uuid);
     Page<UserEntity> getAll (Integer page, Integer size);
+    Boolean isExist (String mail);
 
 }

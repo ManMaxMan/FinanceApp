@@ -1,6 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.utils;
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.JWTProperty;
+import com.github.ManMaxMan.FinanceApp.serviceUser.controller.config.JWTProperty;
 import io.jsonwebtoken.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
