@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceUser.service.security;
+package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security;
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;

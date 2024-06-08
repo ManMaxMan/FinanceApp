@@ -6,7 +6,7 @@ CREATE ROLE FIN_user_service_app WITH
     INHERIT
     NOREPLICATION
     CONNECTION LIMIT -1
-    PASSWORD 'xxxxxx';
+    PASSWORD 'user';
 
 CREATE DATABASE user_service
     WITH

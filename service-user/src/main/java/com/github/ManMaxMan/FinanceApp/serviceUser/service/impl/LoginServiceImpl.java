@@ -5,7 +5,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserLoginDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ILoginService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
-import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils.JwtTokenHandler;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

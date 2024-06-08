@@ -1,6 +1,7 @@
 package com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.config.CustomLocalDateTimeDesSerializer;
@@ -23,11 +24,12 @@ public class CurrencyDTO {
     private String title;
     private String description;
 
+    @JsonProperty("dt_create")
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
     private LocalDateTime dtCreate;
 
-
+    @JsonProperty("dt_update")
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
     private LocalDateTime dtUpdate;

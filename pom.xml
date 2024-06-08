@@ -13,5 +13,6 @@
     <modules>
         <module>service-user</module>
         <module>service-classifier</module>
+        <module>service-account</module>
     </modules>
 </project>

@@ -12,6 +12,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntit
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IManagementService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.VerifyCodeConfig;
+import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -140,55 +141,23 @@ public class ManagementServiceImpl implements IManagementService {
             UserEntity userDb = optional.get();
             UserEntity userUpdate = converterToEntity.convert(userAddUpdate);
 
+            if(!userDb.getDtUpdate().equals(userUpdate.getDtUpdate())){
+                throw new OptimisticLockException("Несоответствие версий. Данные обновлены другим пользователем," +
+                        "попробуйте ещё раз.");
+            }
+
             userDb.setDtUpdate(updateDTO.getDtUpdate());
             userDb.setPassword(encoder.encode(userUpdate.getPassword()));
             userDb.setFio(userUpdate.getFio());
             userDb.setRole(userUpdate.getRole());
+
             if (Objects.equals(userDb.getMail(), userUpdate.getMail())){
-                switch (userDb.getStatus()){
-                    case WAITING_ACTIVATION:{
-                        switch (userUpdate.getStatus()){
-                            case WAITING_ACTIVATION:{break;}
-                            case DEACTIVATED:{
-                                userDb.setStatus(EUserStatus.DEACTIVATED);
-                                break;
-                            }
-                            case ACTIVATED:{
-                                userDb.setStatus(EUserStatus.ACTIVATED);
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case ACTIVATED:{
-                        switch (userUpdate.getStatus()){
-                            case WAITING_ACTIVATION:{
-                                userDb.setStatus(EUserStatus.WAITING_ACTIVATION);
-                                userDb.setVerificationEntity(generateVerificationEntity());
-                                break;
-                            }
-                            case DEACTIVATED:{
-                                userDb.setStatus(EUserStatus.DEACTIVATED);
-                                break;
-                            }
-                            case ACTIVATED:{break;}
-                        }
-                        break;
-                    }
-                    case DEACTIVATED:{
-                        switch (userUpdate.getStatus()){
-                            case WAITING_ACTIVATION:{
-                                userDb.setStatus(EUserStatus.WAITING_ACTIVATION);
-                                userDb.setVerificationEntity(generateVerificationEntity());
-                                break;
-                            }
-                            case DEACTIVATED:{break;}
-                            case ACTIVATED:{
-                                userDb.setStatus(EUserStatus.ACTIVATED);
-                                break;
-                            }
-                        }
-                        break;
+                EUserStatus oldStatus = userDb.getStatus();
+                EUserStatus newStatus = userUpdate.getStatus();
+                userDb.setStatus(newStatus);
+                if (!oldStatus.equals(newStatus)){
+                    if (EUserStatus.WAITING_ACTIVATION.equals(newStatus)){
+                        userDb.setVerificationEntity(generateVerificationEntity());
                     }
                 }
             }else {

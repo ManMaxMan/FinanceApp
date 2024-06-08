@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl;
+package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.data;
 
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EMessageStatus;

@@ -20,9 +20,9 @@ public class CurrencyController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCurrency(@RequestBody CurrencyDTO currencyDTO) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createCurrency(@RequestBody CurrencyDTO currencyDTO) {
         currencyService.create(currencyDTO);
-        return ResponseEntity.status(201).build();
     }
 
     @GetMapping(produces = "application/json")

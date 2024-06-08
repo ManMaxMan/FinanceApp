@@ -18,9 +18,9 @@ public class RegistrationController {
     }
 
     @PostMapping(value = "/registration", produces = "application/json")
-    public ResponseEntity<?> registration(@RequestBody UserRegistrationDTO registrationDTO) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void registration(@RequestBody UserRegistrationDTO registrationDTO) {
         registrationService.registration(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping(value = "/verification", produces = "application/json")

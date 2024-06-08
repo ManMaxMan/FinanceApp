@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceClassifier.service.impl;
+package com.github.ManMaxMan.FinanceApp.serviceClassifier.service.impl.data;
 
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.api.ICategoryRepository;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.entity.CategoryEntity;

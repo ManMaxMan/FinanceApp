@@ -1,4 +1,4 @@
-package com.github.ManMaxMan.FinanceApp.serviceUser.service.utils;
+package com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils;
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.controller.config.JWTProperty;
 import io.jsonwebtoken.*;

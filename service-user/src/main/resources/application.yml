@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/user_service
     username: FIN_user_service_app
-    password: qwe123
+    password: user
   mail:
     host: smtp.mail.ru
     port: 587

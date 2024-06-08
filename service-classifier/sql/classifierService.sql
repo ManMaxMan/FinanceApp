@@ -6,7 +6,7 @@ CREATE ROLE "FIN_classifier_service_app" WITH
     INHERIT
     NOREPLICATION
     CONNECTION LIMIT -1
-    PASSWORD 'xxxxxx';
+    PASSWORD 'classifier';
 
 CREATE DATABASE classifier_service
     WITH

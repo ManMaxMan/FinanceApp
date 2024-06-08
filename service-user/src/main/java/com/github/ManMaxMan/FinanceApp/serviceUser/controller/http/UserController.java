@@ -24,9 +24,9 @@ public class UserController {
     }
 
     @PostMapping(produces = "application/json")
-    public ResponseEntity<?> createUser(@RequestBody UserAddUpdateDTO userCreateDTO) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createUser(@RequestBody UserAddUpdateDTO userCreateDTO) {
         managementService.addUser(userCreateDTO);
-        return ResponseEntity.status(201).build();
     }
 
     @GetMapping(value = "/{uuid}", produces = "application/json")

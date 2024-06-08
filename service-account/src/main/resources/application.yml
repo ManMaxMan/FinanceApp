@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/account_service
+    username: FIN_account_service_app
+    password: account
+
+app:
+  jwt:
+    secret: 34c1bc41c744158bdce2b21894ba0422ce24d474ecdac088138f4bde72804918
+    issuer: FinanceApp
+
+
