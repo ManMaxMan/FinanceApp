@@ -14,5 +14,6 @@
         <module>service-user</module>
         <module>service-classifier</module>
         <module>service-account</module>
+        <module>service-audit</module>
     </modules>
 </project>

@@ -37,8 +37,8 @@ public class AccountController {
     }
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<PageAccountDTO> getPage(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                 @RequestParam(value = "size", defaultValue = "20") Integer size) {
+    public ResponseEntity<PageAccountDTO> getPage(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                                                 @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
