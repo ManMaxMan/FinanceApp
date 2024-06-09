@@ -44,7 +44,7 @@ public class AccountController {
 
         Page<AccountEntity> pageEntities = accountService.getPage(pageable);
 
-        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convert(pageEntities));
+        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convertAccount(pageEntities));
     }
 
     @GetMapping(value = "/{uuid}", produces = "application/json")
@@ -52,7 +52,7 @@ public class AccountController {
 
         AccountEntity entity = accountService.getByUuid(uuid);
 
-        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convert(entity));
+        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convertAccount(entity));
     }
 
     @PutMapping(value = "/{uuid}/dt_update/{dt_update}", produces = "application/json")

@@ -13,9 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConverterToDTO implements IConverterToDTO {
 
-
     @Override
-    public PageAccountDTO convert(Page<AccountEntity> pageEntities) {
+    public PageAccountDTO convertAccount(Page<AccountEntity> pageEntities) {
         return PageAccountDTO.builder()
                 .number(pageEntities.getNumber())
                 .size(pageEntities.getSize())
@@ -24,12 +23,12 @@ public class ConverterToDTO implements IConverterToDTO {
                 .first(pageEntities.isFirst())
                 .numberOfElements(pageEntities.getNumberOfElements())
                 .last(pageEntities.isLast())
-                .content(pageEntities.getContent().stream().map(this::convert).toList())
+                .content(pageEntities.getContent().stream().map(this::convertAccount).toList())
                 .build();
     }
 
     @Override
-    public AccountDTO convert(AccountEntity accountEntity) {
+    public AccountDTO convertAccount(AccountEntity accountEntity) {
         return AccountDTO.builder()
                 .uuid(accountEntity.getUuid())
                 .dtCreate(accountEntity.getDtCreate())
@@ -43,7 +42,7 @@ public class ConverterToDTO implements IConverterToDTO {
     }
 
     @Override
-    public PageOperationDTO convert(Page<OperationEntity> pageEntities) {
+    public PageOperationDTO convertOperation(Page<OperationEntity> pageEntities) {
         return PageOperationDTO.builder()
                 .number(pageEntities.getNumber())
                 .size(pageEntities.getSize())
@@ -52,12 +51,12 @@ public class ConverterToDTO implements IConverterToDTO {
                 .first(pageEntities.isFirst())
                 .numberOfElements(pageEntities.getNumberOfElements())
                 .last(pageEntities.isLast())
-                .content(pageEntities.getContent().stream().map(this::convert).toList())
+                .content(pageEntities.getContent().stream().map(this::convertOperation).toList())
                 .build();
     }
 
     @Override
-    public OperationDTO convert(OperationEntity operationEntity) {
+    public OperationDTO convertOperation(OperationEntity operationEntity) {
         return OperationDTO.builder()
                 .uuid(operationEntity.getUuid())
                 .dtCreate(operationEntity.getDtCreate())

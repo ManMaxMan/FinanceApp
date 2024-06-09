@@ -1,11 +1,14 @@
 package com.github.ManMaxMan.FinanceApp.serviceAccount.service.impl;
 
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationTaskDTO;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.core.enums.EOperationTask;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.dao.entity.OperationEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IAccountBasicService;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IOperationDaoService;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IOperationService;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.converter.api.IConverterToEntity;
+import jakarta.persistence.OptimisticLockException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -64,16 +68,84 @@ public class OperationServiceImpl implements IOperationService {
 
     @Override
     @Transactional
-    public void checkFields(OperationCreateDTO operationCreateDTO) {
-        if (operationCreateDTO.getDate() ==null || operationCreateDTO.getDescription() == null
-            || operationCreateDTO.getCategory() == null || operationCreateDTO.getValue() == null
-            || operationCreateDTO.getCurrency() == null){
-            throw new IllegalArgumentException("Create operation has empty field");
+    public Page<OperationEntity> getPage(UUID uuid, Pageable pageable) {
+
+        if (!accountBasicService.isExist(uuid)){
+            throw new IllegalArgumentException("Account uuid not exist");
+        }
+
+        Page<OperationEntity> page = operationDaoService.getByAccountUuid(
+                pageable, accountBasicService.getByUuid(uuid).get());
+
+        logger.log(Level.INFO, "Get page of account successfully");
+
+        return page;
+    }
+
+    @Override
+    @Transactional
+    public void task(OperationTaskDTO operationTaskDTO) {
+
+        if(operationTaskDTO.getDtUpdate() == null){
+            throw new IllegalArgumentException("Date update is null");
+        }
+
+        if (!accountBasicService.isExist(operationTaskDTO.getAccountUuid())){
+            throw new IllegalArgumentException("Account uuid not exist");
+        }
+
+        if (!operationDaoService.isExist(operationTaskDTO.getOperationUuid())){
+            throw new IllegalArgumentException("Operation uuid not exist");
+        }
+
+        Optional<OperationEntity> optionalOperation = operationDaoService.getByUuid(operationTaskDTO.getOperationUuid());
+        if (optionalOperation.isPresent()){
+
+            OperationEntity operationEntityDb = optionalOperation.get();
+
+            if (!operationEntityDb.getDtUpdate().equals(operationTaskDTO.getDtUpdate())) {
+                throw new OptimisticLockException("Несоответствие версий. Данные обновлены другим пользователем," +
+                        "попробуйте ещё раз.");
+            }
+
+            switch (operationTaskDTO.getOperationTask()){
+                case DELETE ->{
+                    operationDaoService.delete(operationTaskDTO.getOperationUuid());
+                    logger.log(Level.INFO, "Operation delete successfully");
+                }
+                case UPDATE ->{
+                    OperationCreateDTO operationCreateDTO = operationTaskDTO.getOperationCreateDTO();
+                    checkFields(operationCreateDTO);
+
+                    UUID categoryUuid = operationCreateDTO.getCategory();
+                    UUID currencyUuid = operationCreateDTO.getCurrency();
+
+                    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    //CHECK UUID x2
+
+                    operationEntityDb.setDtExecute(operationCreateDTO.getDate());
+                    operationEntityDb.setDescription(operationCreateDTO.getDescription());
+                    operationEntityDb.setCategoryUuid(categoryUuid);
+                    operationEntityDb.setValue(operationCreateDTO.getValue());
+                    operationEntityDb.setCurrencyUuid(currencyUuid);
+
+                    operationDaoService.create(operationEntityDb);
+
+                    logger.log(Level.INFO, "Operation update successfully");
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("Operation uuid deleted another user");
         }
     }
 
     @Override
-    public Page<OperationEntity> getPage(UUID uuid, Pageable pageable) {
-        return null;
+    @Transactional
+    public void checkFields(OperationCreateDTO operationCreateDTO) {
+        if (operationCreateDTO.getDate() ==null || operationCreateDTO.getDescription() == null
+                || operationCreateDTO.getCategory() == null || operationCreateDTO.getValue() == null
+                || operationCreateDTO.getCurrency() == null){
+            throw new IllegalArgumentException("Create operation has empty field");
+        }
     }
 }

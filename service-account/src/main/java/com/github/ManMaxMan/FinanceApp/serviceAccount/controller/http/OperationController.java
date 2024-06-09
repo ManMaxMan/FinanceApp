@@ -4,7 +4,8 @@ package com.github.ManMaxMan.FinanceApp.serviceAccount.controller.http;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.converter.api.IConverterToDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.PageOperationDTO;
-import com.github.ManMaxMan.FinanceApp.serviceAccount.dao.entity.AccountEntity;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationTaskDTO;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.core.enums.EOperationTask;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.dao.entity.OperationEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IOperationService;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -36,8 +38,7 @@ public class OperationController {
         operationService.create(uuid, operation);
     }
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(produces = "application/json")
     public ResponseEntity<PageOperationDTO> getPage (@PathVariable(value = "uuid") UUID uuid,
                                                      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
                                                      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
@@ -46,7 +47,41 @@ public class OperationController {
 
         Page<OperationEntity> pageEntities = operationService.getPage(uuid, pageable);
 
-        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convert(pageEntities));
+        return ResponseEntity.status(HttpStatus.OK).body(converterToDTO.convertOperation(pageEntities));
 
+    }
+
+    @PutMapping(value = "/{uuid_operation}/dt_update/{dt_update}")
+    @ResponseStatus(HttpStatus.OK)
+    public void update(@PathVariable(value = "uuid") UUID accountUuid,
+                       @PathVariable(value = "uuid_operation") UUID operationUuid,
+                       @PathVariable(value = "dt_update") LocalDateTime dtUpdate,
+                       @RequestBody OperationCreateDTO operationCreateDTO) {
+
+        OperationTaskDTO updateOperationDTO = OperationTaskDTO.builder()
+                .accountUuid(accountUuid)
+                .operationUuid(operationUuid)
+                .dtUpdate(dtUpdate)
+                .operationCreateDTO(operationCreateDTO)
+                .operationTask(EOperationTask.UPDATE)
+                .build();
+
+        operationService.task(updateOperationDTO);
+    }
+
+    @DeleteMapping(value = "/{uuid_operation}/dt_update/{dt_update}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable(value = "uuid") UUID accountUuid,
+                       @PathVariable(value = "uuid_operation") UUID operationUuid,
+                       @PathVariable(value = "dt_update") LocalDateTime dtUpdate) {
+
+        OperationTaskDTO deleteOperationDTO = OperationTaskDTO.builder()
+                .accountUuid(accountUuid)
+                .operationUuid(operationUuid)
+                .dtUpdate(dtUpdate)
+                .operationTask(EOperationTask.DELETE)
+                .build();
+
+        operationService.task(deleteOperationDTO);
     }
 }
