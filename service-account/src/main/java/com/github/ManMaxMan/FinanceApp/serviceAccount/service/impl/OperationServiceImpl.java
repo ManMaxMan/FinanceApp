@@ -86,7 +86,7 @@ public class OperationServiceImpl implements IOperationService {
                     .uuidEntity(operationEntity.getUuid())
                     .text("Create operation")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
 
             logger.log(Level.INFO, "Operation created successfully");
 
@@ -113,7 +113,7 @@ public class OperationServiceImpl implements IOperationService {
                     .uuidEntity(entity.getUuid())
                     .text("Get operation for account in page")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page of account successfully");
@@ -157,7 +157,7 @@ public class OperationServiceImpl implements IOperationService {
                             .uuidEntity(operationTaskDTO.getOperationUuid())
                             .text("Operation delete")
                             .build();
-                    auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+                    auditClientFeign.createAuditAction(null,auditCreateDTO);
 
                     logger.log(Level.INFO, "Operation delete successfully");
                 }
@@ -192,7 +192,7 @@ public class OperationServiceImpl implements IOperationService {
                             .uuidEntity(operationEntityDb.getUuid())
                             .text("Operation update")
                             .build();
-                    auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+                    auditClientFeign.createAuditAction(null,auditCreateDTO);
 
                     logger.log(Level.INFO, "Operation update successfully");
                 }

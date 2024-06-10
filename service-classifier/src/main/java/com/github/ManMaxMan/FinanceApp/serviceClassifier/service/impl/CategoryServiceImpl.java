@@ -65,7 +65,7 @@ public class CategoryServiceImpl implements ICategoryService {
                 .uuidEntity(category.getUuid())
                 .text("Create category")
                 .build();
-        auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+        auditClientFeign.createAuditAction(null,auditCreateDTO);
 
         logger.log(Level.INFO, "Category create successful");
     }
@@ -91,7 +91,7 @@ public class CategoryServiceImpl implements ICategoryService {
                     .uuidEntity(entity.getUuid())
                     .text("Get information about category in page")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Category page get successful");

@@ -78,7 +78,7 @@ public class AccountServiceImpl implements IAccountService {
                 .uuidEntity(entity.getUuid())
                 .text("Create account")
                 .build();
-        auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+        auditClientFeign.createAuditAction(null,auditCreateDTO);
 
         logger.log(Level.INFO, "Account created successfully");
     }
@@ -97,7 +97,7 @@ public class AccountServiceImpl implements IAccountService {
                     .uuidEntity(entity.getUuid())
                     .text("Get account by uuid in page")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page of account successfully");
@@ -119,7 +119,7 @@ public class AccountServiceImpl implements IAccountService {
                     .uuidEntity(optional.get().getUuid())
                     .text("Get account by uuid")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
 
             logger.log(Level.INFO, "Get account by uuid successfully");
             return optional.get();
@@ -165,7 +165,7 @@ public class AccountServiceImpl implements IAccountService {
                     .uuidEntity(accountEntityDb.getUuid())
                     .text("Update account by uuid")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
 
             logger.log(Level.INFO, "Update account by uuid successfully");
 

@@ -27,7 +27,7 @@ public class SecurityServiceImpl implements ISecurityService {
         Optional<UserEntity> optional = userService.getByMail(mail);
 
         if (optional.isPresent()){
-            return new User(optional.get().getUuid().toString(), token, Collections.emptyList());
+            return new UserDetailsImpl(optional.get());
         }else {
             throw new IllegalArgumentException("User not found");
         }

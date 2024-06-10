@@ -51,3 +51,8 @@ CREATE TABLE app.verification
 
 ALTER TABLE IF EXISTS app.verification
     OWNER to "FIN_user_service_app";
+
+INSERT INTO app.users(
+    uuid, dt_create, dt_update, mail, fio, role, status, password)
+VALUES ('1f01f564-40d0-4146-8d6e-f4b76529af0e', '2024-06-10 17:19:32.012604+03', '2024-06-10 17:19:32.012604+03',
+        'admin@finance.app', 'admin', 'ADMIN', 'ACTIVATED', '$2a$10$jvDjYkG51h0t.8ltdblsp.zkSv6U5TsQh.NFYxx5Z3460WgVxbDrq');

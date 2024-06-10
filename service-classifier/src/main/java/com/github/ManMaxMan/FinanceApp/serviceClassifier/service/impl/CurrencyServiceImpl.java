@@ -66,7 +66,7 @@ public class CurrencyServiceImpl implements ICurrencyService {
                 .uuidEntity(currency.getUuid())
                 .text("Create currency")
                 .build();
-        auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+        auditClientFeign.createAuditAction(null,auditCreateDTO);
 
 
         logger.log(Level.INFO, "Currency create successful");
@@ -93,7 +93,7 @@ public class CurrencyServiceImpl implements ICurrencyService {
                     .uuidEntity(entity.getUuid())
                     .text("Get information about currency in page")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Currency page get successful");

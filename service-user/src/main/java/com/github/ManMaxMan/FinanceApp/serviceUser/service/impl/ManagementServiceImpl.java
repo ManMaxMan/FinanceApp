@@ -110,7 +110,7 @@ public class ManagementServiceImpl implements IManagementService {
                 .text("User update")
                 .build();
 
-        auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+        auditClient.createAuditAction(null, auditCreateDTO);
 
         logger.log(Level.INFO, "User successfully add");
     }
@@ -130,7 +130,7 @@ public class ManagementServiceImpl implements IManagementService {
                     .text("Get information about user by UUID")
                     .build();
 
-            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+            auditClient.createAuditAction(null, auditCreateDTO);
 
             logger.log(Level.INFO, "Get information about user by UUID");
             return optional.get();
@@ -202,7 +202,7 @@ public class ManagementServiceImpl implements IManagementService {
                     .text("Update user")
                     .build();
 
-            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+            auditClient.createAuditAction(null, auditCreateDTO);
 
             logger.log(Level.INFO, "Update user successfully");
         }else {
@@ -240,7 +240,7 @@ public class ManagementServiceImpl implements IManagementService {
                     .uuidEntity(entity.getUuid())
                     .text("Get information about user in page")
                     .build();
-            auditClient.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClient.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page users");

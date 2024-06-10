@@ -56,7 +56,7 @@ public class AuditServiceImpl implements IAuditService {
                     .uuidEntity(uuid)
                     .text("Get information about the audit record")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
 
             logger.log(Level.INFO, "Get audit action by uuid: "+ uuid);
 
@@ -111,7 +111,7 @@ public class AuditServiceImpl implements IAuditService {
                     .uuidEntity(entity.getUuid())
                     .text("Get information about the audit record in page")
                     .build();
-            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+            auditClientFeign.createAuditAction(null,auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get audit page");

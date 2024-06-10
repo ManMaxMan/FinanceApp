@@ -53,7 +53,6 @@ public class JwtFilter extends OncePerRequestFilter {
         UserDetails userDetails = securityService
                 .getUserDetails(jwtHandler.getMail(token), header);
 
-
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null,

@@ -2,6 +2,7 @@ package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl;
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.TokenDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserLoginDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ILoginService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
@@ -52,6 +53,10 @@ public class LoginServiceImpl implements ILoginService {
 
             UserEntity userEntity = optional.get();
 
+            if (!userEntity.getStatus().equals(EUserStatus.ACTIVATED)){
+                throw new IllegalArgumentException("Login not activated users");
+            }
+
             String encodedPassword = userEntity.getPassword();
 
             if (!encoder.matches(userLoginDTO.getPassword(), encodedPassword)) {
@@ -61,6 +66,10 @@ public class LoginServiceImpl implements ILoginService {
             UserDetails userDetails = new User(userEntity.getMail(), userEntity.getPassword(),
                     Collections.emptyList());
 
+
+
+            String token = jwtTokenHandler.generateAccessToken(userDetails, userEntity.getRole() );
+
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.USER)
                     .uuidUser(userEntity.getUuid())
@@ -68,11 +77,11 @@ public class LoginServiceImpl implements ILoginService {
                     .text("User login successfully")
                     .build();
 
-            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+            auditClient.createAuditAction(null, auditCreateDTO);
 
             logger.log(Level.INFO,"Login successful");
 
-            return jwtTokenHandler.generateAccessToken(userDetails, userEntity.getRole() );
+            return token;
         }else {
             throw new IllegalArgumentException("Login failed: "+userLoginDTO.getMail());
         }
@@ -95,7 +104,7 @@ public class LoginServiceImpl implements ILoginService {
                     .text("User get information about me")
                     .build();
 
-            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+            auditClient.createAuditAction(null, auditCreateDTO);
 
             logger.log(Level.INFO,"Get info about user "+userDetails.getUsername());
             return optional.get();

@@ -119,7 +119,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
                 userService.create(userEntity);
 
                 AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
-                        .type(ETypeEntity.VERIFY)
+                        .type(ETypeEntity.USER)
                         .uuidUser(userEntity.getUuid())
                         .uuidEntity(userEntity.getVerificationEntity().getUuid())
                         .text("User verification successfully")
