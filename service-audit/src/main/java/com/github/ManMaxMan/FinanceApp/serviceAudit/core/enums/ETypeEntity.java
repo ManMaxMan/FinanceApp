@@ -2,9 +2,11 @@ package com.github.ManMaxMan.FinanceApp.serviceAudit.core.enums;
 
 public enum ETypeEntity {
     USER,
-    REPORT,
+    VERIFY,
+    AUDIT,
     ACCOUNT,
     OPERATION,
     CATEGORY,
-    CURRENCY
+    CURRENCY,
+    REPORT
 }

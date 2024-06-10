@@ -7,9 +7,11 @@ spring:
     username: FIN_audit_service_app
     password: audit
 
+
 app:
   jwt:
     secret: 34c1bc41c744158bdce2b21894ba0422ce24d474ecdac088138f4bde72804918
     issuer: FinanceApp
+
 
 

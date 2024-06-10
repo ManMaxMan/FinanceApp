@@ -27,14 +27,14 @@ public class AuditController {
 
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<PageAuditDTO> getPage(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                @RequestParam(value = "size", defaultValue = "20") Integer size) {
+    public ResponseEntity<PageAuditDTO> getPage(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                                                @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        //Page<AuditEntity> pageEntities = accountService.getPage(pageable);
+        PageAuditDTO pageAuditDTO = auditService.getPage(pageable);
 
-        return null;
+        return ResponseEntity.status(HttpStatus.OK).body(pageAuditDTO);
 
     }
 

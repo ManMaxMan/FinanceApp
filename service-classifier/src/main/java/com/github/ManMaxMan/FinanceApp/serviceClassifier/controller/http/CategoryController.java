@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/classifier/operation/category")
 public class CategoryController {
@@ -37,5 +39,10 @@ public class CategoryController {
         PageOfCategoryDTO pageOfCategoryDTO= converterToDTO.convert(categoryService.getPage(pageOfCategoryEntityDTO));
 
         return ResponseEntity.status(HttpStatus.OK).body(pageOfCategoryDTO);
+    }
+
+    @GetMapping(value = "/{uuid}")
+    public Boolean existsByUuid (@PathVariable(value = "uuid") UUID uuid){
+        return categoryService.existsByUuid(uuid);
     }
 }

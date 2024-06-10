@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/api/classifier/currency")
+@RequestMapping("/classifier/currency")
 public class CurrencyController {
     private final ICurrencyService currencyService;
     private final IConverterToDTO converterToDTO;
@@ -35,6 +37,11 @@ public class CurrencyController {
         PageOfCurrencyDTO pageOfCurrencyDTO= converterToDTO.convert(currencyService.getPage(pageOfCurrencyEntityDTO));
 
         return ResponseEntity.status(HttpStatus.OK).body(pageOfCurrencyDTO);
+    }
+
+    @GetMapping("/{uuid}")
+    public Boolean existsCurrency (@PathVariable(value = "uuid") UUID uuid) {
+        return currencyService.existByUuid(uuid);
     }
 
 }

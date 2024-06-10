@@ -6,6 +6,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UpdateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserAddUpdateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.VerificationEntity;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 
 import java.util.UUID;
 

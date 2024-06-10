@@ -6,6 +6,9 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ILoginService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.api.AuditClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.dto.AuditCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.enums.ETypeEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,14 +31,16 @@ public class LoginServiceImpl implements ILoginService {
     private final PasswordEncoder encoder;
     private final JwtTokenHandler jwtTokenHandler;
     private final UserHolder userHolder;
+    private final AuditClientFeign auditClient;
 
     private final static Logger logger = LogManager.getLogger();
 
-    public LoginServiceImpl(IUserService userService, PasswordEncoder encoder, JwtTokenHandler jwtTokenHandler, UserHolder userHolder) {
+    public LoginServiceImpl(IUserService userService, PasswordEncoder encoder, JwtTokenHandler jwtTokenHandler, UserHolder userHolder, AuditClientFeign auditClient) {
         this.userService = userService;
         this.encoder = encoder;
         this.jwtTokenHandler = jwtTokenHandler;
         this.userHolder = userHolder;
+        this.auditClient = auditClient;
     }
 
     @Override
@@ -43,18 +49,30 @@ public class LoginServiceImpl implements ILoginService {
 
         Optional<UserEntity> optional = userService.getByMail(userLoginDTO.getMail());
         if (optional.isPresent()){
-            String encodedPassword = optional.get().getPassword();
+
+            UserEntity userEntity = optional.get();
+
+            String encodedPassword = userEntity.getPassword();
 
             if (!encoder.matches(userLoginDTO.getPassword(), encodedPassword)) {
                 throw new IllegalArgumentException("Login failed:"+userLoginDTO.getMail());
             }
 
-            UserDetails userDetails = new User(optional.get().getMail(), optional.get().getPassword(),
+            UserDetails userDetails = new User(userEntity.getMail(), userEntity.getPassword(),
                     Collections.emptyList());
+
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.USER)
+                    .uuidUser(userEntity.getUuid())
+                    .uuidEntity(userEntity.getUuid())
+                    .text("User login successfully")
+                    .build();
+
+            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
 
             logger.log(Level.INFO,"Login successful");
 
-            return jwtTokenHandler.generateAccessToken(userDetails);
+            return jwtTokenHandler.generateAccessToken(userDetails, userEntity.getRole() );
         }else {
             throw new IllegalArgumentException("Login failed: "+userLoginDTO.getMail());
         }
@@ -66,9 +84,19 @@ public class LoginServiceImpl implements ILoginService {
 
         UserDetails userDetails = userHolder.getUser();
 
-        Optional<UserEntity> optional = userService.getByMail(userDetails.getUsername());
+        Optional<UserEntity> optional = userService.getByUuid(UUID.fromString(userDetails.getUsername()));
 
         if (optional.isPresent()){
+
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.USER)
+                    .uuidUser(optional.get().getUuid())
+                    .uuidEntity(optional.get().getUuid())
+                    .text("User get information about me")
+                    .build();
+
+            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+
             logger.log(Level.INFO,"Get info about user "+userDetails.getUsername());
             return optional.get();
         }else {

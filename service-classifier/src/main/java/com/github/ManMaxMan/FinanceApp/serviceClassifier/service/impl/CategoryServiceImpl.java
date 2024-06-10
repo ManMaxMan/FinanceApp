@@ -7,6 +7,10 @@ import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.dto.PageOfC
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.interfaces.ICategoryDaoService;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.interfaces.ICategoryService;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.interfaces.IConverterToEntity;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.feign.api.AuditClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.feign.dto.AuditCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.feign.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.utils.UserHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,12 +27,16 @@ public class CategoryServiceImpl implements ICategoryService {
 
     private final ICategoryDaoService categoryDaoService;
     private final IConverterToEntity converterToEntity;
+    private final AuditClientFeign auditClientFeign;
+    private final UserHolder userHolder;
 
     private final static Logger logger = LogManager.getLogger();
 
-    public CategoryServiceImpl(ICategoryDaoService categoryDaoService, IConverterToEntity converterToEntity) {
+    public CategoryServiceImpl(ICategoryDaoService categoryDaoService, IConverterToEntity converterToEntity, AuditClientFeign auditClientFeign, UserHolder userHolder) {
         this.categoryDaoService = categoryDaoService;
         this.converterToEntity = converterToEntity;
+        this.auditClientFeign = auditClientFeign;
+        this.userHolder = userHolder;
     }
 
     @Override
@@ -51,6 +59,14 @@ public class CategoryServiceImpl implements ICategoryService {
 
         categoryDaoService.create(category);
 
+        AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                .type(ETypeEntity.CATEGORY)
+                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidEntity(category.getUuid())
+                .text("Create category")
+                .build();
+        auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+
         logger.log(Level.INFO, "Category create successful");
     }
 
@@ -68,9 +84,24 @@ public class CategoryServiceImpl implements ICategoryService {
         item.setNumberOfElements(pageCategory.getNumberOfElements());
         item.setContent(pageCategory.getContent());
 
+        item.getContent().forEach(entity->{
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.REPORT)
+                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidEntity(entity.getUuid())
+                    .text("Get information about category in page")
+                    .build();
+            auditClientFeign.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+        });
+
         logger.log(Level.INFO, "Category page get successful");
 
         return item;
+    }
+
+    @Override
+    public Boolean existsByUuid(UUID uuid) {
+        return categoryDaoService.existsByUuid(uuid);
     }
 
 }

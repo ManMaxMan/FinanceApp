@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(requests -> requests
                 .requestMatchers("/cabinet/login", "/cabinet/registration", "/cabinet/verification").permitAll()
-                //.requestMatchers("/users/**").hasAnyRole("ADMIN")
+                .requestMatchers("/users/**").hasAnyRole("ADMIN")
                 .anyRequest().authenticated());
 
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

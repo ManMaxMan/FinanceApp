@@ -1,7 +1,7 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.controller.filter;
 
-import com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security.UserDetailsServiceImpl;
 import com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ISecurityService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,11 +25,12 @@ import static org.apache.logging.log4j.util.Strings.isEmpty;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtTokenHandler jwtHandler;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final ISecurityService securityService;
 
-    public JwtFilter(JwtTokenHandler jwtTokenHandler, UserDetailsServiceImpl userDetailsService) {
+    public JwtFilter(JwtTokenHandler jwtTokenHandler, ISecurityService securityService) {
         this.jwtHandler = jwtTokenHandler;
-        this.userDetailsService = userDetailsService;
+
+        this.securityService = securityService;
     }
 
     @Override
@@ -49,8 +50,9 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        UserDetails userDetails = userDetailsService
-                .loadUserByUsername(jwtHandler.getMail(token));
+        UserDetails userDetails = securityService
+                .getUserDetails(jwtHandler.getMail(token), header);
+
 
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(

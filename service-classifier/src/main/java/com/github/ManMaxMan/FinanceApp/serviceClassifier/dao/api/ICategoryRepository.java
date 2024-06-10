@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ICategoryRepository extends JpaRepository<CategoryEntity, UUID> {
     Boolean existsByTitle (String name);
+    Boolean existsByUuid (UUID uuid);
 }

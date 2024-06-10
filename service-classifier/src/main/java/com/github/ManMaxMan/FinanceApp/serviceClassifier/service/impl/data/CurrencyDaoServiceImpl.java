@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @Transactional(readOnly = true)
 public class CurrencyDaoServiceImpl implements ICurrencyDaoService {
@@ -33,5 +35,10 @@ public class CurrencyDaoServiceImpl implements ICurrencyDaoService {
     @Override
     public Page<CurrencyEntity> getPage(Integer page, Integer size) {
         return currencyRepository.findAll(PageRequest.of(page, size));
+    }
+
+    @Override
+    public Boolean isExist(UUID uuid) {
+        return currencyRepository.existsByUuid(uuid);
     }
 }

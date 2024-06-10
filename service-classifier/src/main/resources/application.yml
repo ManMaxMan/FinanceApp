@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   datasource:
@@ -10,6 +10,5 @@ spring:
 app:
   jwt:
     secret: 34c1bc41c744158bdce2b21894ba0422ce24d474ecdac088138f4bde72804918
-    issuer: FinanceApp
 
 

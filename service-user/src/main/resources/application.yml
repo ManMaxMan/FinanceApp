@@ -31,5 +31,3 @@ verify-code:
   length: 25
   letters: true
   numbers: true
-
-

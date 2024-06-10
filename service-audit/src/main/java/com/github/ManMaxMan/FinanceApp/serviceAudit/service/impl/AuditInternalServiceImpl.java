@@ -1,10 +1,13 @@
 package com.github.ManMaxMan.FinanceApp.serviceAudit.service.impl;
 
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.dto.AuditCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceAudit.core.enums.ETypeEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.dao.entity.AuditEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.service.api.IAuditDaoService;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.service.api.IAuditInternalService;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.service.api.IConverterToEntity;
+import com.github.ManMaxMan.FinanceApp.serviceAudit.service.feign.api.AuditClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceAudit.service.utils.UserHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

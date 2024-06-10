@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ICurrencyRepository extends JpaRepository<CurrencyEntity, UUID> {
     Boolean existsByTitle (String name);
+    Boolean existsByUuid (UUID uuid);
 }

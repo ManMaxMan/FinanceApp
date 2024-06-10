@@ -12,6 +12,10 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntit
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IManagementService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.VerifyCodeConfig;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.api.AuditClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.dto.AuditCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -37,14 +41,18 @@ public class ManagementServiceImpl implements IManagementService {
     private final IConverterToEntity converterToEntity;
     private final VerifyCodeConfig verifyCodeConfig;
     private final PasswordEncoder encoder;
+    private final AuditClientFeign auditClient;
+    private final UserHolder userHolder;
 
     private final static Logger logger = LogManager.getLogger();
 
-    public ManagementServiceImpl(IUserService userService, IConverterToEntity converterToEntity, VerifyCodeConfig verifyCodeConfig, PasswordEncoder encoder) {
+    public ManagementServiceImpl(IUserService userService, IConverterToEntity converterToEntity, VerifyCodeConfig verifyCodeConfig, PasswordEncoder encoder, AuditClientFeign auditClient, UserHolder userHolder) {
         this.userService = userService;
         this.converterToEntity = converterToEntity;
         this.verifyCodeConfig = verifyCodeConfig;
         this.encoder = encoder;
+        this.auditClient = auditClient;
+        this.userHolder = userHolder;
     }
 
     @Override
@@ -95,6 +103,15 @@ public class ManagementServiceImpl implements IManagementService {
 
         userService.create(userEntity);
 
+        AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                .type(ETypeEntity.USER)
+                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidEntity(userEntity.getUuid())
+                .text("User update")
+                .build();
+
+        auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+
         logger.log(Level.INFO, "User successfully add");
     }
 
@@ -105,6 +122,16 @@ public class ManagementServiceImpl implements IManagementService {
         Optional<UserEntity> optional = userService.getByUuid(uuid);
 
         if (optional.isPresent()){
+
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.USER)
+                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidEntity(optional.get().getUuid())
+                    .text("Get information about user by UUID")
+                    .build();
+
+            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+
             logger.log(Level.INFO, "Get information about user by UUID");
             return optional.get();
         }else {
@@ -168,6 +195,15 @@ public class ManagementServiceImpl implements IManagementService {
 
             userService.create(userDb);
 
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.USER)
+                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidEntity(optional.get().getUuid())
+                    .text("Update user")
+                    .build();
+
+            auditClient.createAuditAction(userHolder.getUser().getPassword(), auditCreateDTO);
+
             logger.log(Level.INFO, "Update user successfully");
         }else {
             throw new IllegalArgumentException("User for update not found");
@@ -196,6 +232,18 @@ public class ManagementServiceImpl implements IManagementService {
         pageOfUser.setTotalElements(pageUsers.getTotalElements());
         pageOfUser.setNumberOfElements(pageUsers.getNumberOfElements());
         pageOfUser.setContent(pageUsers.getContent());
+
+        pageOfUser.getContent().forEach(entity->{
+            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                    .type(ETypeEntity.REPORT)
+                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidEntity(entity.getUuid())
+                    .text("Get information about user in page")
+                    .build();
+            auditClient.createAuditAction(userHolder.getUser().getPassword(),auditCreateDTO);
+        });
+
+        logger.log(Level.INFO, "Get page users");
 
         return pageOfUser;
     }

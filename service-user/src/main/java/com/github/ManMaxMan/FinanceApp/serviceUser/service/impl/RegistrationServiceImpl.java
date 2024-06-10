@@ -11,6 +11,10 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IConverterToEntit
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IRegistrationService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IUserService;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.VerifyCodeConfig;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.api.AuditClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.dto.AuditCreateDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.Level;
@@ -31,14 +35,18 @@ public class RegistrationServiceImpl implements IRegistrationService {
     private final IConverterToEntity converterToEntity;
     private final IUserService userService;
     private final VerifyCodeConfig verifyCodeConfig;
+    private final AuditClientFeign auditClient;
+    private final UserHolder userHolder;
 
     private final static Logger logger = LogManager.getLogger();
 
 
-    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, VerifyCodeConfig verifyCodeConfig) {
+    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, VerifyCodeConfig verifyCodeConfig, AuditClientFeign auditClient, UserHolder userHolder) {
         this.converterToEntity=converterToEntity;
         this.userService = userService;
         this.verifyCodeConfig = verifyCodeConfig;
+        this.auditClient = auditClient;
+        this.userHolder = userHolder;
     }
 
     @Override
@@ -75,6 +83,16 @@ public class RegistrationServiceImpl implements IRegistrationService {
 
         userService.create(userEntity);
 
+
+        AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                .type(ETypeEntity.USER)
+                .uuidUser(userEntity.getUuid())
+                .uuidEntity(userEntity.getUuid())
+                .text("User registration successfully")
+                .build();
+
+        auditClient.createAuditAction(null, auditCreateDTO);
+
         logger.log(Level.INFO, "Registration user successfully created");
 
     }
@@ -85,18 +103,30 @@ public class RegistrationServiceImpl implements IRegistrationService {
         Optional<UserEntity> optional = userService.getByMail(verificationDTO.getEmail());
         if(optional.isPresent()){
 
-            if (optional.get().getStatus() != EUserStatus.WAITING_ACTIVATION) {
+            UserEntity userEntity = optional.get();
+
+            if (userEntity.getStatus() != EUserStatus.WAITING_ACTIVATION) {
                 throw new IllegalArgumentException("Verification user not waiting activation");
             }
-            if (optional.get().getVerificationEntity().getMessageStatus()!=EMessageStatus.OK) {
+            if (userEntity.getVerificationEntity().getMessageStatus()!=EMessageStatus.OK) {
                 throw new IllegalArgumentException("Verification user suspicious! Verification message_status: "
-                        +optional.get().getVerificationEntity().getMessageStatus());
+                        +userEntity.getVerificationEntity().getMessageStatus());
             }
 
-            if(Objects.equals(optional.get().getVerificationEntity().getVerificationCode(),
+            if(Objects.equals(userEntity.getVerificationEntity().getVerificationCode(),
                     verificationDTO.getVerificationCode())) {
-                optional.get().setStatus(EUserStatus.ACTIVATED);
-                userService.create(optional.get());
+                userEntity.setStatus(EUserStatus.ACTIVATED);
+                userService.create(userEntity);
+
+                AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                        .type(ETypeEntity.VERIFY)
+                        .uuidUser(userEntity.getUuid())
+                        .uuidEntity(userEntity.getVerificationEntity().getUuid())
+                        .text("User verification successfully")
+                        .build();
+
+                auditClient.createAuditAction(null, auditCreateDTO);
+
                 logger.log(Level.INFO, "Verification user successfully verified");
             }else {
                 throw new IllegalArgumentException("Verification user present, but verification code is different");

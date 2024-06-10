@@ -5,8 +5,11 @@ import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.entity.CurrencyEnti
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.dto.CurrencyDTO;
 import org.springframework.data.domain.Page;
 
+import java.util.UUID;
+
 public interface ICurrencyDaoService {
     Boolean isExist (String name);
     void create (CurrencyEntity currency);
     Page<CurrencyEntity> getPage (Integer page, Integer size);
+    Boolean isExist (UUID uuid);
 }

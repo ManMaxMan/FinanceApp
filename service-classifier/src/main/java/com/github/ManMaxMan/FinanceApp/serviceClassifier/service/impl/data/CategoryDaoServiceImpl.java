@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @Transactional(readOnly = true)
 public class CategoryDaoServiceImpl implements ICategoryDaoService {
@@ -33,5 +35,10 @@ public class CategoryDaoServiceImpl implements ICategoryDaoService {
     @Override
     public Page<CategoryEntity> getPage(Integer page, Integer size) {
         return categoryRepository.findAll(PageRequest.of(page, size));
+    }
+
+    @Override
+    public Boolean existsByUuid(UUID uuid) {
+        return categoryRepository.existsByUuid(uuid);
     }
 }
