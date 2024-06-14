@@ -3,5 +3,6 @@ package com.github.ManMaxMan.FinanceApp.serviceAccount.controller.filter.feign.e
 public enum EUserRole {
     ADMIN ,
     USER ,
-    MANAGER
+    MANAGER,
+    SYSTEM
 }

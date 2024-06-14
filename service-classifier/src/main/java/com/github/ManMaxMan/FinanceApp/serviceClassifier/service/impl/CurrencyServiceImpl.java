@@ -1,5 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceClassifier.service.impl;
 
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.utils.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.api.ICurrencyRepository;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.entity.CategoryEntity;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.entity.CurrencyEntity;
@@ -60,13 +61,15 @@ public class CurrencyServiceImpl implements ICurrencyService {
 
         currencyDaoService.create(currency);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
         AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                 .type(ETypeEntity.CURRENCY)
-                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidUser(UUID.fromString(userDetails.getUsername()))
                 .uuidEntity(currency.getUuid())
                 .text("Create currency")
                 .build();
-        auditClientFeign.createAuditAction(null,auditCreateDTO);
+        auditClientFeign.createAuditAction(auditCreateDTO);
 
 
         logger.log(Level.INFO, "Currency create successful");
@@ -86,7 +89,7 @@ public class CurrencyServiceImpl implements ICurrencyService {
         pageOfCurrencyEntityDTO.setNumberOfElements(page.getNumberOfElements());
         pageOfCurrencyEntityDTO.setContent(page.getContent());
 
-        pageOfCurrencyEntityDTO.getContent().forEach(entity->{
+        /*pageOfCurrencyEntityDTO.getContent().forEach(entity->{
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.REPORT)
                     .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
@@ -94,7 +97,7 @@ public class CurrencyServiceImpl implements ICurrencyService {
                     .text("Get information about currency in page")
                     .build();
             auditClientFeign.createAuditAction(null,auditCreateDTO);
-        });
+        });*/
 
         logger.log(Level.INFO, "Currency page get successful");
 

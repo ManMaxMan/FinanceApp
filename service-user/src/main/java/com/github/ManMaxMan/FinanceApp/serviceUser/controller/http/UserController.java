@@ -1,14 +1,21 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.controller.http;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.github.ManMaxMan.FinanceApp.serviceUser.controller.config.CustomLocalDateTimeDesSerializer;
 import com.github.ManMaxMan.FinanceApp.serviceUser.controller.converter.ConverterToDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.*;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.IManagementService;
+import jakarta.persistence.Convert;
+import org.springframework.data.convert.ValueConverter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @RestController
@@ -51,12 +58,14 @@ public class UserController {
 
     @PutMapping(value = "/{uuid}/dt_update/{dt_update}", produces = "application/json")
     public ResponseEntity<?> updateUser(@PathVariable("uuid") UUID uuid,
-                                                       @PathVariable("dt_update") LocalDateTime dtUpdate,
+                                                       @PathVariable("dt_update") Long dtUpdate,
                                                        @RequestBody UserAddUpdateDTO userAddUpdateDTO) {
+
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(dtUpdate), ZoneId.systemDefault());
 
         UpdateDTO updateDTO = UpdateDTO.builder()
                 .uuid(uuid)
-                .dtUpdate(dtUpdate)
+                .dtUpdate(dateTime)
                 .userAddUpdateDTO(userAddUpdateDTO)
                 .build();
         managementService.updateUser(updateDTO);

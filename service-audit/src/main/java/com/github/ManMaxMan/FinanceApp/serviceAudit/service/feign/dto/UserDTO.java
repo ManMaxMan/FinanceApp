@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.controller.config.CustomLocalDateTimeDesSerializer;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.controller.config.CustomLocalDateTimeSerializer;
-import com.github.ManMaxMan.FinanceApp.serviceAudit.controller.filter.feign.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.enums.EUserRole;
 import lombok.*;
 

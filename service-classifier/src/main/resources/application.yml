@@ -1,14 +1,10 @@
-server:
-  port: 8082
-
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/classifier_service
-    username: FIN_classifier_service_app
-    password: classifier
+  main:
+    allow-bean-definition-overriding: true
 
 app:
   jwt:
     secret: 34c1bc41c744158bdce2b21894ba0422ce24d474ecdac088138f4bde72804918
+    issuer: FinanceApp
 
 

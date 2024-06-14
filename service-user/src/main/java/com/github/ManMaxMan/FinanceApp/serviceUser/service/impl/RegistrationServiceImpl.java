@@ -36,17 +36,15 @@ public class RegistrationServiceImpl implements IRegistrationService {
     private final IUserService userService;
     private final VerifyCodeConfig verifyCodeConfig;
     private final AuditClientFeign auditClient;
-    private final UserHolder userHolder;
 
     private final static Logger logger = LogManager.getLogger();
 
 
-    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, VerifyCodeConfig verifyCodeConfig, AuditClientFeign auditClient, UserHolder userHolder) {
+    public RegistrationServiceImpl(IConverterToEntity converterToEntity, IUserService userService, VerifyCodeConfig verifyCodeConfig, AuditClientFeign auditClient) {
         this.converterToEntity=converterToEntity;
         this.userService = userService;
         this.verifyCodeConfig = verifyCodeConfig;
         this.auditClient = auditClient;
-        this.userHolder = userHolder;
     }
 
     @Override
@@ -91,7 +89,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
                 .text("User registration successfully")
                 .build();
 
-        auditClient.createAuditAction(null, auditCreateDTO);
+        auditClient.createAuditAction(auditCreateDTO);
 
         logger.log(Level.INFO, "Registration user successfully created");
 
@@ -125,7 +123,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
                         .text("User verification successfully")
                         .build();
 
-                auditClient.createAuditAction(null, auditCreateDTO);
+                auditClient.createAuditAction(auditCreateDTO);
 
                 logger.log(Level.INFO, "Verification user successfully verified");
             }else {

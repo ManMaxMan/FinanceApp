@@ -1,0 +1,31 @@
+project:
+  version: v1
+
+server:
+  port: 8080
+  address: localhost
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service
+    username: FIN_user_service_app
+    password: user
+
+  mail:
+    host: smtp.mail.ru
+    port: 587
+    username: annatsurko2003@mail.ru
+    password: nggrtU3WtsD6yjxHcre6
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          auditClientFeign:
+            url: http://localhost:8081/audit
+
+message:
+  server: ${server.address}:${server.port}
+  username: ${spring.mail.username}
+  subject: FinanceApp
+  version: ${project.version}

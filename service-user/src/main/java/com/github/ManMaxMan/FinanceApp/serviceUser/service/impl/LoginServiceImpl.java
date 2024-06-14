@@ -2,6 +2,7 @@ package com.github.ManMaxMan.FinanceApp.serviceUser.service.impl;
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.TokenDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.dto.UserLoginDTO;
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserRole;
 import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserStatus;
 import com.github.ManMaxMan.FinanceApp.serviceUser.dao.entity.UserEntity;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ILoginService;
@@ -10,6 +11,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils.JwtTokenHand
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.api.AuditClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.dto.AuditCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -77,7 +79,7 @@ public class LoginServiceImpl implements ILoginService {
                     .text("User login successfully")
                     .build();
 
-            auditClient.createAuditAction(null, auditCreateDTO);
+            auditClient.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO,"Login successful");
 
@@ -91,20 +93,23 @@ public class LoginServiceImpl implements ILoginService {
     @Transactional
     public UserEntity getUser(TokenDTO token) {
 
-        UserDetails userDetails = userHolder.getUser();
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
 
-        Optional<UserEntity> optional = userService.getByUuid(UUID.fromString(userDetails.getUsername()));
+        Optional<UserEntity> optional = userService.getByMail(userDetails.getUsername());
 
         if (optional.isPresent()){
 
-            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
-                    .type(ETypeEntity.USER)
-                    .uuidUser(optional.get().getUuid())
-                    .uuidEntity(optional.get().getUuid())
-                    .text("User get information about me")
-                    .build();
+            if (!userDetails.getRoleFrom().equals(EUserRole.SYSTEM)){
+                AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                        .type(ETypeEntity.USER)
+                        .uuidUser(optional.get().getUuid())
+                        .uuidEntity(optional.get().getUuid())
+                        .text("User get information about me")
+                        .build();
 
-            auditClient.createAuditAction(null, auditCreateDTO);
+                auditClient.createAuditAction(auditCreateDTO);
+            }
+
 
             logger.log(Level.INFO,"Get info about user "+userDetails.getUsername());
             return optional.get();

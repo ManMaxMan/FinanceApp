@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @RestController
@@ -58,12 +60,14 @@ public class AccountController {
     @PutMapping(value = "/{uuid}/dt_update/{dt_update}", produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public void update(@PathVariable(value = "uuid") UUID uuid,
-                       @PathVariable(value = "dt_update") LocalDateTime dtUpdate,
+                       @PathVariable(value = "dt_update") Long dtUpdate,
                        @RequestBody AccountCreateDTO account) {
+
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(dtUpdate), ZoneId.systemDefault());
 
         UpdateAccountDTO updateAccount= UpdateAccountDTO.builder()
                 .uuid(uuid)
-                .dtUpdate(dtUpdate)
+                .dtUpdate(dateTime)
                 .accountCreateDTO(account)
                 .build();
 

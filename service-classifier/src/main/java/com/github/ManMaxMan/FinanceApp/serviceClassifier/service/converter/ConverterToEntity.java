@@ -13,8 +13,8 @@ public class ConverterToEntity implements IConverterToEntity {
     public CurrencyEntity convert(CurrencyDTO currencyDTO) {
 
         CurrencyEntity currencyEntity = new CurrencyEntity();
-        currencyEntity.setTitle(currencyEntity.getTitle());
-        currencyEntity.setDescription(currencyEntity.getDescription());
+        currencyEntity.setTitle(currencyDTO.getTitle());
+        currencyEntity.setDescription(currencyDTO.getDescription());
 
         return currencyEntity;
     }
@@ -23,7 +23,7 @@ public class ConverterToEntity implements IConverterToEntity {
     public CategoryEntity convert(CategoryDTO categoryDTO) {
 
         CategoryEntity categoryEntity = new CategoryEntity();
-        categoryEntity.setTitle(categoryEntity.getTitle());
+        categoryEntity.setTitle(categoryDTO.getTitle());
 
         return categoryEntity;
     }

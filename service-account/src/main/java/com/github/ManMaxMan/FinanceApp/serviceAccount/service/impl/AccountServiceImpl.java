@@ -1,5 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceAccount.service.impl;
 
+import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.utils.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.AccountCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.UpdateAccountDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.enums.EAccountType;
@@ -9,7 +10,7 @@ import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IAccountDaoSer
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IAccountService;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.converter.api.IConverterToEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.AuditClientFeign;
-import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.CurrencyClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.ClassifierClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.dto.AuditCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.enums.ETypeEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.utils.UserHolder;
@@ -36,18 +37,19 @@ public class AccountServiceImpl implements IAccountService {
     private final IConverterToEntity converterToEntity;
     private final AuditClientFeign auditClientFeign;
     private final UserHolder userHolder;
-    private final CurrencyClientFeign currencyClientFeign;
+    private final ClassifierClientFeign classifierClientFeign;
 
     private final static Logger logger = LogManager.getLogger();
 
-    public AccountServiceImpl(IAccountDaoService accountDaoService, IAccountBasicService accountBasicService, IConverterToEntity converterToEntity, AuditClientFeign auditClientFeign, UserHolder userHolder, CurrencyClientFeign currencyClientFeign) {
+    public AccountServiceImpl(IAccountDaoService accountDaoService, IAccountBasicService accountBasicService, IConverterToEntity converterToEntity, AuditClientFeign auditClientFeign, UserHolder userHolder, ClassifierClientFeign classifierClientFeign) {
         this.accountDaoService = accountDaoService;
         this.accountBasicService = accountBasicService;
         this.converterToEntity = converterToEntity;
 
         this.auditClientFeign = auditClientFeign;
         this.userHolder = userHolder;
-        this.currencyClientFeign = currencyClientFeign;
+
+        this.classifierClientFeign = classifierClientFeign;
     }
 
     @Override
@@ -56,7 +58,9 @@ public class AccountServiceImpl implements IAccountService {
 
         checkFields(accountCreateDTO);
 
-        if(!currencyClientFeign.isExistCurrency(userHolder.getUser().getPassword(),
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
+        if(!classifierClientFeign.isExistCurrency(userDetails.getCurrentHeaderToken(),
                 accountCreateDTO.getCurrency())) {
             throw new IllegalArgumentException("Currency is not exist");
         }
@@ -68,17 +72,17 @@ public class AccountServiceImpl implements IAccountService {
         entity.setDtUpdate(localDateTime);
         entity.setBalance(0);
 
-        entity.setUserUuid(UUID.fromString(userHolder.getUser().getUsername()));
+        entity.setUserUuid(UUID.fromString(userDetails.getUsername()));
 
         accountDaoService.create(entity);
 
         AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                 .type(ETypeEntity.ACCOUNT)
-                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidUser(UUID.fromString(userDetails.getUsername()))
                 .uuidEntity(entity.getUuid())
                 .text("Create account")
                 .build();
-        auditClientFeign.createAuditAction(null,auditCreateDTO);
+        auditClientFeign.createAuditAction(auditCreateDTO);
 
         logger.log(Level.INFO, "Account created successfully");
     }
@@ -87,17 +91,19 @@ public class AccountServiceImpl implements IAccountService {
     @Transactional
     public Page<AccountEntity> getPage(Pageable pageable) {
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
         Page<AccountEntity> page = accountDaoService.getByUserUuid(pageable,
-                UUID.fromString(userHolder.getUser().getUsername()));
+                UUID.fromString(userDetails.getUsername()));
 
         page.getContent().forEach(entity->{
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
-                    .type(ETypeEntity.ACCOUNT)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .type(ETypeEntity.REPORT)
+                    .uuidUser(UUID.fromString(userDetails.getUsername()))
                     .uuidEntity(entity.getUuid())
                     .text("Get account by uuid in page")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page of account successfully");
@@ -113,13 +119,15 @@ public class AccountServiceImpl implements IAccountService {
 
         if (optional.isPresent()){
 
+            UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.ACCOUNT)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidUser(UUID.fromString(userDetails.getUsername()))
                     .uuidEntity(optional.get().getUuid())
                     .text("Get account by uuid")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO, "Get account by uuid successfully");
             return optional.get();
@@ -139,14 +147,16 @@ public class AccountServiceImpl implements IAccountService {
         Optional<AccountEntity> optional = accountBasicService.getByUuid(updateAccountDTO.getUuid());
         if (optional.isPresent()){
 
-            if(!currencyClientFeign.isExistCurrency(userHolder.getUser().getPassword(),
+            UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
+            if(!classifierClientFeign.isExistCurrency(userDetails.getCurrentHeaderToken(),
                     updateAccountDTO.getAccountCreateDTO().getCurrency())) {
                 throw new IllegalArgumentException("Currency is not exist");
             }
 
             AccountEntity accountEntityDb = optional.get();
 
-            if (!accountEntityDb.getDtUpdate().equals(updateAccountDTO.getDtUpdate())) {
+            if (!accountEntityDb.getDtUpdate().withNano(0).equals(updateAccountDTO.getDtUpdate().withNano(0))) {
                 throw new OptimisticLockException("Несоответствие версий. Данные обновлены другим пользователем," +
                         "попробуйте ещё раз.");
             }
@@ -161,11 +171,11 @@ public class AccountServiceImpl implements IAccountService {
 
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.ACCOUNT)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidUser(UUID.fromString(userDetails.getUsername()))
                     .uuidEntity(accountEntityDb.getUuid())
                     .text("Update account by uuid")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO, "Update account by uuid successfully");
 

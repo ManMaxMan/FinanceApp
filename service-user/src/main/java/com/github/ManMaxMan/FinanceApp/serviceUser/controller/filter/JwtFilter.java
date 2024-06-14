@@ -2,6 +2,7 @@ package com.github.ManMaxMan.FinanceApp.serviceUser.controller.filter;
 
 import com.github.ManMaxMan.FinanceApp.serviceUser.controller.utils.JwtTokenHandler;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.api.ISecurityService;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,8 +51,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        UserDetails userDetails = securityService
-                .getUserDetails(jwtHandler.getMail(token), header);
+        UserDetailsImpl userDetails = securityService
+                .getUserDetails(jwtHandler.getMail(token), jwtHandler.getRole(token));
+
+        if (userDetails == null) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(
@@ -65,6 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         chain.doFilter(request, response);
 
     }

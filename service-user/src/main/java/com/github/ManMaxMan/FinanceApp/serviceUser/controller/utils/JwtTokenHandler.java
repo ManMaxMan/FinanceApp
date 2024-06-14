@@ -43,13 +43,13 @@ public class JwtTokenHandler {
         return claims.getSubject();
     }
 
-    public UUID getUuid (String token) {
+    public String getRole (String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(property.getSecret())
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.get("uuid", UUID.class);
+        return claims.get("role", String.class);
     }
 
 

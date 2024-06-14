@@ -32,6 +32,7 @@ public class LoginController {
         TokenDTO tokenDTO = TokenDTO.builder()
                 .token(token)
                 .build();
+
         UserDTO user = converterToDTO.convert(loginService.getUser(tokenDTO));
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }

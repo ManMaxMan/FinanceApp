@@ -1,7 +1,8 @@
 package com.github.ManMaxMan.FinanceApp.serviceUser.service.api;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import com.github.ManMaxMan.FinanceApp.serviceUser.core.enums.EUserRole;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security.UserDetailsImpl;
 
 public interface ISecurityService {
-    UserDetails getUserDetails(String mail, String token);
+    UserDetailsImpl getUserDetails(String mail, String strUserRole);
 }

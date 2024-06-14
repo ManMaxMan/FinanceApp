@@ -1,10 +1,37 @@
 {
   "Servers": {
     "1": {
-      "Name": "Finance DB",
-      "Group": "Server Group 1",
+      "Name": "account_service",
+      "Group": "account_service",
       "Port": 5432,
-      "Username": "finance_admin",
+      "Username": "FIN_account_service_app",
+      "Host": "pg_db",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "postgres"
+    },
+    "2": {
+      "Name": "audit_service",
+      "Group": "audit_service",
+      "Port": 5432,
+      "Username": "FIN_audit_service_app",
+      "Host": "pg_db",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "postgres"
+    },
+    "3": {
+      "Name": "classifier_service",
+      "Group": "classifier_service",
+      "Port": 5432,
+      "Username": "FIN_classifier_service_app",
+      "Host": "pg_db",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "postgres"
+    },
+    "4": {
+      "Name": "user_service",
+      "Group": "user_service",
+      "Port": 5432,
+      "Username": "FIN_user_service_app",
       "Host": "pg_db",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres"

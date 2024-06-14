@@ -1,12 +1,6 @@
-server:
-  port: 8081
-
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/audit_service
-    username: FIN_audit_service_app
-    password: audit
-
+  main:
+    allow-bean-definition-overriding: true
 
 app:
   jwt:

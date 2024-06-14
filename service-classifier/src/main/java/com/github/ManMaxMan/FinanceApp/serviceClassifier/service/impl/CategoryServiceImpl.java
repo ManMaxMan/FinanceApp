@@ -1,5 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceClassifier.service.impl;
 
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.utils.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.api.ICategoryRepository;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.dao.entity.CategoryEntity;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.service.api.dto.CategoryDTO;
@@ -59,13 +60,15 @@ public class CategoryServiceImpl implements ICategoryService {
 
         categoryDaoService.create(category);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
         AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                 .type(ETypeEntity.CATEGORY)
-                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidUser(UUID.fromString(userDetails.getUsername()))
                 .uuidEntity(category.getUuid())
                 .text("Create category")
                 .build();
-        auditClientFeign.createAuditAction(null,auditCreateDTO);
+        auditClientFeign.createAuditAction(auditCreateDTO);
 
         logger.log(Level.INFO, "Category create successful");
     }
@@ -84,7 +87,7 @@ public class CategoryServiceImpl implements ICategoryService {
         item.setNumberOfElements(pageCategory.getNumberOfElements());
         item.setContent(pageCategory.getContent());
 
-        item.getContent().forEach(entity->{
+        /*item.getContent().forEach(entity->{
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.REPORT)
                     .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
@@ -92,7 +95,7 @@ public class CategoryServiceImpl implements ICategoryService {
                     .text("Get information about category in page")
                     .build();
             auditClientFeign.createAuditAction(null,auditCreateDTO);
-        });
+        });*/
 
         logger.log(Level.INFO, "Category page get successful");
 

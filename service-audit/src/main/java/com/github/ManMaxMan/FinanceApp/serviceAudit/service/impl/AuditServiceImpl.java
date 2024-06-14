@@ -1,10 +1,13 @@
 package com.github.ManMaxMan.FinanceApp.serviceAudit.service.impl;
 
+import com.github.ManMaxMan.FinanceApp.serviceAudit.controller.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceAudit.controller.utils.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.dto.AuditCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.dto.AuditDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.dto.PageAuditDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.dto.UserAuditDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.core.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceAudit.core.enums.EUserRole;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.dao.entity.AuditEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.service.api.IAuditDaoService;
 import com.github.ManMaxMan.FinanceApp.serviceAudit.service.api.IAuditService;
@@ -31,15 +34,17 @@ public class AuditServiceImpl implements IAuditService {
     private final IAuditDaoService auditDaoService;
     private final AuditClientFeign auditClientFeign;
     private final UserHolder userHolder;
+    private final JwtTokenHandler tokenHandler;
     private final UserClientFeign userClientFeign;
 
     private final static Logger logger = LogManager.getLogger();
 
 
-    public AuditServiceImpl(IAuditDaoService auditDaoService, AuditClientFeign auditClientFeign, UserHolder userHolder, UserClientFeign userClientFeign) {
+    public AuditServiceImpl(IAuditDaoService auditDaoService, AuditClientFeign auditClientFeign, UserHolder userHolder, JwtTokenHandler tokenHandler, UserClientFeign userClientFeign) {
         this.auditDaoService = auditDaoService;
         this.auditClientFeign = auditClientFeign;
         this.userHolder = userHolder;
+        this.tokenHandler = tokenHandler;
         this.userClientFeign = userClientFeign;
     }
 
@@ -50,13 +55,15 @@ public class AuditServiceImpl implements IAuditService {
         Optional<AuditEntity> optional = auditDaoService.getByUuid(uuid);
         if (optional.isPresent()) {
 
+            System.out.println("in get "+UUID.fromString(userHolder.getUser().getUsername()));
+
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.AUDIT)
                     .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
                     .uuidEntity(uuid)
                     .text("Get information about the audit record")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO, "Get audit action by uuid: "+ uuid);
 
@@ -83,10 +90,13 @@ public class AuditServiceImpl implements IAuditService {
                 .content(new ArrayList<>())
                 .build();
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+        String newToken = tokenHandler.generateAccessToken(userDetails.getMail(), EUserRole.SYSTEM);
+
         pageEntities.getContent().forEach(entity->{
 
-            UserDTO userDTO = userClientFeign.getUserByUuid(userHolder.getUser().getPassword(),
-                    entity.getUserUuid());
+            UserDTO userDTO = userClientFeign.get("Bearer "+newToken,
+                    entity.getUserUuid()).getBody();
             UserAuditDTO userAuditDTO = UserAuditDTO.builder()
                     .fio(userDTO.getFio())
                     .mail(userDTO.getMail())
@@ -111,7 +121,7 @@ public class AuditServiceImpl implements IAuditService {
                     .uuidEntity(entity.getUuid())
                     .text("Get information about the audit record in page")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get audit page");

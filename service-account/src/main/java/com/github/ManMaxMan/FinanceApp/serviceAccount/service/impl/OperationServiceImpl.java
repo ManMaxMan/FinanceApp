@@ -1,5 +1,6 @@
 package com.github.ManMaxMan.FinanceApp.serviceAccount.service.impl;
 
+import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.utils.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.core.dto.OperationTaskDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.dao.entity.OperationEntity;
@@ -8,8 +9,7 @@ import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IOperationDaoS
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.api.IOperationService;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.converter.api.IConverterToEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.AuditClientFeign;
-import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.CategoryClientFeign;
-import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.CurrencyClientFeign;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.api.ClassifierClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.dto.AuditCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.feign.enums.ETypeEntity;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.service.utils.UserHolder;
@@ -35,19 +35,18 @@ public class OperationServiceImpl implements IOperationService {
     private final IConverterToEntity converterToEntity;
     private final AuditClientFeign auditClientFeign;
     private final UserHolder userHolder;
-    private final CurrencyClientFeign currencyClientFeign;
-    private final CategoryClientFeign categoryClientFeign;
+    private final ClassifierClientFeign classifierClientFeign;
 
     private final static Logger logger = LogManager.getLogger();
 
-    public OperationServiceImpl(IOperationDaoService operationDaoService, IAccountBasicService accountBasicService, IConverterToEntity converterToEntity, AuditClientFeign auditClientFeign, UserHolder userHolder, CurrencyClientFeign currencyClientFeign, CategoryClientFeign categoryClientFeign) {
+
+    public OperationServiceImpl(IOperationDaoService operationDaoService, IAccountBasicService accountBasicService, IConverterToEntity converterToEntity, AuditClientFeign auditClientFeign, UserHolder userHolder, ClassifierClientFeign classifierClientFeign) {
         this.operationDaoService = operationDaoService;
         this.accountBasicService = accountBasicService;
         this.converterToEntity = converterToEntity;
         this.auditClientFeign = auditClientFeign;
         this.userHolder = userHolder;
-        this.currencyClientFeign = currencyClientFeign;
-        this.categoryClientFeign = categoryClientFeign;
+        this.classifierClientFeign = classifierClientFeign;
     }
 
     @Override
@@ -57,15 +56,18 @@ public class OperationServiceImpl implements IOperationService {
         checkFields(operationCreateDTO);
 
         if (accountBasicService.isExist(uuid)){
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
             UUID currencyUuid = operationCreateDTO.getCurrency();
             UUID categoryUuid = operationCreateDTO.getCategory();
 
             //CHECK UUID x2
-            if(!currencyClientFeign.isExistCurrency(userHolder.getUser().getPassword(),
+            if(!classifierClientFeign.isExistCurrency(userDetails.getCurrentHeaderToken(),
                     currencyUuid)) {
                 throw new IllegalArgumentException("Currency is not exist");
             }
-            if(!categoryClientFeign.isExistCategory(userHolder.getUser().getPassword(),
+            if(!classifierClientFeign.isExistCategory(userDetails.getCurrentHeaderToken(),
                     categoryUuid)) {
                 throw new IllegalArgumentException("Category is not exist");
             }
@@ -82,11 +84,11 @@ public class OperationServiceImpl implements IOperationService {
 
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.OPERATION)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidUser(UUID.fromString(userDetails.getUsername()))
                     .uuidEntity(operationEntity.getUuid())
                     .text("Create operation")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO, "Operation created successfully");
 
@@ -103,17 +105,19 @@ public class OperationServiceImpl implements IOperationService {
             throw new IllegalArgumentException("Account uuid not exist");
         }
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
         Page<OperationEntity> page = operationDaoService.getByAccountUuid(
                 pageable, accountBasicService.getByUuid(uuid).get());
 
         page.getContent().forEach(entity->{
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
-                    .type(ETypeEntity.OPERATION)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .type(ETypeEntity.REPORT)
+                    .uuidUser(UUID.fromString(userDetails.getUsername()))
                     .uuidEntity(entity.getUuid())
                     .text("Get operation for account in page")
                     .build();
-            auditClientFeign.createAuditAction(null,auditCreateDTO);
+            auditClientFeign.createAuditAction(auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page of account successfully");
@@ -142,10 +146,12 @@ public class OperationServiceImpl implements IOperationService {
 
             OperationEntity operationEntityDb = optionalOperation.get();
 
-            if (!operationEntityDb.getDtUpdate().equals(operationTaskDTO.getDtUpdate())) {
+            if (!operationEntityDb.getDtUpdate().withNano(0).equals(operationTaskDTO.getDtUpdate().withNano(0))) {
                 throw new OptimisticLockException("Несоответствие версий. Данные обновлены другим пользователем," +
                         "попробуйте ещё раз.");
             }
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
 
             switch (operationTaskDTO.getOperationTask()){
                 case DELETE ->{
@@ -153,11 +159,11 @@ public class OperationServiceImpl implements IOperationService {
 
                     AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                             .type(ETypeEntity.OPERATION)
-                            .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                            .uuidUser(UUID.fromString(userDetails.getUsername()))
                             .uuidEntity(operationTaskDTO.getOperationUuid())
                             .text("Operation delete")
                             .build();
-                    auditClientFeign.createAuditAction(null,auditCreateDTO);
+                    auditClientFeign.createAuditAction(auditCreateDTO);
 
                     logger.log(Level.INFO, "Operation delete successfully");
                 }
@@ -169,11 +175,11 @@ public class OperationServiceImpl implements IOperationService {
                     UUID currencyUuid = operationCreateDTO.getCurrency();
 
                     //CHECK UUID x2
-                    if(!currencyClientFeign.isExistCurrency(userHolder.getUser().getPassword(),
+                    if(!classifierClientFeign.isExistCurrency(userDetails.getCurrentHeaderToken(),
                             currencyUuid)) {
                         throw new IllegalArgumentException("Currency is not exist");
                     }
-                    if(!categoryClientFeign.isExistCategory(userHolder.getUser().getPassword(),
+                    if(!classifierClientFeign.isExistCategory(userDetails.getCurrentHeaderToken(),
                             categoryUuid)) {
                         throw new IllegalArgumentException("Category is not exist");
                     }
@@ -188,11 +194,11 @@ public class OperationServiceImpl implements IOperationService {
 
                     AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                             .type(ETypeEntity.OPERATION)
-                            .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                            .uuidUser(UUID.fromString(userDetails.getUsername()))
                             .uuidEntity(operationEntityDb.getUuid())
                             .text("Operation update")
                             .build();
-                    auditClientFeign.createAuditAction(null,auditCreateDTO);
+                    auditClientFeign.createAuditAction(auditCreateDTO);
 
                     logger.log(Level.INFO, "Operation update successfully");
                 }

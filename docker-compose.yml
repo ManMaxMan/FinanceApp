@@ -26,7 +26,41 @@ services:
       - 82:80
     networks:
       - finance-network
-  
+  account-service:
+    build: service-account
+    image: account-service:1.0.0
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - finance-network
+  audit-service:
+    build: service-audit
+    image: audit-service:1.0.0
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - finance-network
+  classifier-service:
+    build: service-classifier
+    image: classifier-service:1.0.0
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - finance-network
+  user-service:
+    build: service-user
+    image: user-service:1.0.0
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - finance-network
+  proxy:
+    build: proxy
+    image: proxy-finance:1.0.0
+    ports:
+      - 80:80
+    networks:
+      - finance-network	  
 
 networks:
   finance-network:

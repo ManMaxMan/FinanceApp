@@ -3,5 +3,6 @@ package com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter.feig
 public enum EUserRole {
     ADMIN ,
     USER ,
-    MANAGER
+    MANAGER,
+    SYSTEM
 }

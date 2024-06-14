@@ -15,6 +15,7 @@ import com.github.ManMaxMan.FinanceApp.serviceUser.service.config.VerifyCodeConf
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.api.AuditClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.dto.AuditCreateDTO;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.feigns.enums.ETypeEntity;
+import com.github.ManMaxMan.FinanceApp.serviceUser.service.impl.security.UserDetailsImpl;
 import com.github.ManMaxMan.FinanceApp.serviceUser.service.utils.UserHolder;
 import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.EnumUtils;
@@ -103,14 +104,16 @@ public class ManagementServiceImpl implements IManagementService {
 
         userService.create(userEntity);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) userHolder.getUser();
+
         AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                 .type(ETypeEntity.USER)
-                .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                .uuidUser(userDetails.getUuid())
                 .uuidEntity(userEntity.getUuid())
-                .text("User update")
+                .text("User add")
                 .build();
 
-        auditClient.createAuditAction(null, auditCreateDTO);
+        auditClient.createAuditAction(auditCreateDTO);
 
         logger.log(Level.INFO, "User successfully add");
     }
@@ -121,16 +124,20 @@ public class ManagementServiceImpl implements IManagementService {
 
         Optional<UserEntity> optional = userService.getByUuid(uuid);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl)(userHolder.getUser());
+
         if (optional.isPresent()){
 
-            AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
-                    .type(ETypeEntity.USER)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
-                    .uuidEntity(optional.get().getUuid())
-                    .text("Get information about user by UUID")
-                    .build();
+            if (!userDetails.getRoleFrom().equals(EUserRole.SYSTEM)){
+                AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
+                        .type(ETypeEntity.USER)
+                        .uuidUser(userDetails.getUuid())
+                        .uuidEntity(optional.get().getUuid())
+                        .text("Get information about user by UUID")
+                        .build();
 
-            auditClient.createAuditAction(null, auditCreateDTO);
+                auditClient.createAuditAction(auditCreateDTO);
+            }
 
             logger.log(Level.INFO, "Get information about user by UUID");
             return optional.get();
@@ -168,7 +175,7 @@ public class ManagementServiceImpl implements IManagementService {
             UserEntity userDb = optional.get();
             UserEntity userUpdate = converterToEntity.convert(userAddUpdate);
 
-            if(!userDb.getDtUpdate().equals(userUpdate.getDtUpdate())){
+            if(!userDb.getDtUpdate().withNano(0).equals(updateDTO.getDtUpdate().withNano(0))){
                 throw new OptimisticLockException("Несоответствие версий. Данные обновлены другим пользователем," +
                         "попробуйте ещё раз.");
             }
@@ -195,14 +202,16 @@ public class ManagementServiceImpl implements IManagementService {
 
             userService.create(userDb);
 
+            UserDetailsImpl userDetails = (UserDetailsImpl)(userHolder.getUser());
+
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.USER)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidUser(userDetails.getUuid())
                     .uuidEntity(optional.get().getUuid())
                     .text("Update user")
                     .build();
 
-            auditClient.createAuditAction(null, auditCreateDTO);
+            auditClient.createAuditAction(auditCreateDTO);
 
             logger.log(Level.INFO, "Update user successfully");
         }else {
@@ -233,14 +242,16 @@ public class ManagementServiceImpl implements IManagementService {
         pageOfUser.setNumberOfElements(pageUsers.getNumberOfElements());
         pageOfUser.setContent(pageUsers.getContent());
 
+        UserDetailsImpl userDetails = (UserDetailsImpl)(userHolder.getUser());
+
         pageOfUser.getContent().forEach(entity->{
             AuditCreateDTO auditCreateDTO = AuditCreateDTO.builder()
                     .type(ETypeEntity.REPORT)
-                    .uuidUser(UUID.fromString(userHolder.getUser().getUsername()))
+                    .uuidUser(userDetails.getUuid())
                     .uuidEntity(entity.getUuid())
                     .text("Get information about user in page")
                     .build();
-            auditClient.createAuditAction(null,auditCreateDTO);
+            auditClient.createAuditAction(auditCreateDTO);
         });
 
         logger.log(Level.INFO, "Get page users");

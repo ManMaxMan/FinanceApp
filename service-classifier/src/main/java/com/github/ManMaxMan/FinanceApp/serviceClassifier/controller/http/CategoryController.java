@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/classifier/operation/category")
+@RequestMapping("/classifier/operation/category")
 public class CategoryController {
 
     private final ICategoryService categoryService;

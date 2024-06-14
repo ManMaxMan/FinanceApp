@@ -2,12 +2,16 @@ package com.github.ManMaxMan.FinanceApp.serviceAccount.controller.filter;
 
 import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.filter.feign.api.UserClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.filter.feign.dto.UserDTO;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.filter.feign.enums.EUserRole;
 import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceAccount.controller.utils.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -61,16 +65,26 @@ public class JwtFilter extends OncePerRequestFilter {
         // в переменную userDetails.
         // 2. Изначально поместить всё в токен и доставать всё из токена
 
-        UserDTO userDTO = userClientFeign.getMe(header);
+        String newToken = jwtHandler.generateAccessToken(jwtHandler.getUsername(token),
+                EUserRole.SYSTEM);
 
-        UserDetails user = new User(userDTO.getUuid().toString(), header, Collections.emptyList());
+        ResponseEntity<UserDTO> userDTOResponse = userClientFeign.
+                aboutUser("Bearer "+newToken);
 
+        if (userDTOResponse==null|| userDTOResponse.getBody()==null||
+                !userDTOResponse.getStatusCode().equals(HttpStatusCode.valueOf(200))){
+            chain.doFilter(request, response);
+            return;
+        }
+
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(userDTOResponse.getBody(), header);
 
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(
-                user, null,
-                user == null ?
-                        List.of() : user.getAuthorities()
+                userDetails, null,
+                userDetails == null ?
+                        List.of() : userDetails.getAuthorities()
         );
 
         authentication.setDetails(

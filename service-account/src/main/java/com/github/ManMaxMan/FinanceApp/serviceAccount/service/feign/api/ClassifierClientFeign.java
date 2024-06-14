@@ -7,10 +7,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
-@FeignClient(value = "currencyClient", url = "http://localhost:8082/classifier/currency/{uuid}")
-public interface CurrencyClientFeign {
+@FeignClient(value = "classifierClientFeign")
+public interface ClassifierClientFeign {
 
-    @GetMapping
+    @GetMapping(value = "/operation/category/{uuid}")
+    Boolean isExistCategory(@RequestHeader("Authorization") String bearerToken,
+                            @PathVariable("uuid") UUID uuid);
+
+    @GetMapping(value = "/currency/{uuid}")
     Boolean isExistCurrency(@RequestHeader("Authorization") String bearerToken,
                             @PathVariable("uuid") UUID uuid);
+
 }

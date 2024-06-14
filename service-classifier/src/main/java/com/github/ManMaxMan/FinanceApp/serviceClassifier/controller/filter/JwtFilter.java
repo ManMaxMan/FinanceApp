@@ -2,22 +2,23 @@ package com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter;
 
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter.feign.api.UserClientFeign;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter.feign.dto.UserDTO;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter.feign.enums.EUserRole;
 import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.utils.JwtTokenHandler;
+import com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.utils.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import static org.apache.logging.log4j.util.Strings.isEmpty;
@@ -61,16 +62,25 @@ public class JwtFilter extends OncePerRequestFilter {
         // в переменную userDetails.
         // 2. Изначально поместить всё в токен и доставать всё из токена
 
-        UserDTO userDTO = userClientFeign.getMe(header);
+        String newToken = jwtHandler.generateAccessToken(jwtHandler.getUsername(token),
+                EUserRole.SYSTEM);
 
-        UserDetails user = new User(userDTO.getUuid().toString(), header, Collections.emptyList());
+        ResponseEntity<UserDTO> userDTOResponse = userClientFeign.
+                aboutUser("Bearer "+newToken);
 
+        if (userDTOResponse==null|| userDTOResponse.getBody()==null||
+                !userDTOResponse.getStatusCode().equals(HttpStatusCode.valueOf(200))){
+            chain.doFilter(request, response);
+            return;
+        }
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(userDTOResponse.getBody(), header);
 
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(
-                user, null,
-                user == null ?
-                        List.of() : user.getAuthorities()
+                userDetails, null,
+                userDetails == null ?
+                        List.of() : userDetails.getAuthorities()
         );
 
         authentication.setDetails(

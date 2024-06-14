@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @RestController
@@ -55,13 +57,15 @@ public class OperationController {
     @ResponseStatus(HttpStatus.OK)
     public void update(@PathVariable(value = "uuid") UUID accountUuid,
                        @PathVariable(value = "uuid_operation") UUID operationUuid,
-                       @PathVariable(value = "dt_update") LocalDateTime dtUpdate,
+                       @PathVariable(value = "dt_update") Long dtUpdate,
                        @RequestBody OperationCreateDTO operationCreateDTO) {
+
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(dtUpdate), ZoneId.systemDefault());
 
         OperationTaskDTO updateOperationDTO = OperationTaskDTO.builder()
                 .accountUuid(accountUuid)
                 .operationUuid(operationUuid)
-                .dtUpdate(dtUpdate)
+                .dtUpdate(dateTime)
                 .operationCreateDTO(operationCreateDTO)
                 .operationTask(EOperationTask.UPDATE)
                 .build();
