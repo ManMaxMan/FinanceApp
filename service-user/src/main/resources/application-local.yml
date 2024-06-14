@@ -17,12 +17,7 @@ spring:
     username: annatsurko2003@mail.ru
     password: nggrtU3WtsD6yjxHcre6
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          auditClientFeign:
-            url: http://localhost:8081/audit
+urlAuditClientFeign: http://localhost:8080/audit
 
 message:
   server: ${server.address}:${server.port}

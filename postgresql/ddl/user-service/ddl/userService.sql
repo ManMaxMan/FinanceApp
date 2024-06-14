@@ -1,4 +1,4 @@
-CREATE ROLE FIN_user_service_app WITH
+CREATE ROLE "FIN_user_service_app" WITH
     LOGIN
     NOSUPERUSER
     CREATEDB

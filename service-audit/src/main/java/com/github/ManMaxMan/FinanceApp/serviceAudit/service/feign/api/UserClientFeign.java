@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
-@FeignClient(value = "userClientFeign")
+@FeignClient(value = "userClientFeign", url = "${urlUserClientFeign}")
 public interface UserClientFeign {
 
     @GetMapping(value = "/users/{uuid}", produces = "application/json")

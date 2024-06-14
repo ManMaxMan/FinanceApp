@@ -37,6 +37,26 @@ public class UserDetailsImpl implements UserDetails {
         return userDTO.getUuid().toString();
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public String getCurrentHeaderToken(){
         return this.token;
     }

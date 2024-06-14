@@ -7,11 +7,5 @@ spring:
     username: FIN_audit_service_app
     password: audit
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          userClientFeign:
-            url: http://user-service:8080
-          auditClientFeign:
-            url: http://audit-service:8080/audit
+urlUserClientFeign: http://user-service:8080
+urlAuditClientFeign: http://audit-service:8080/audit

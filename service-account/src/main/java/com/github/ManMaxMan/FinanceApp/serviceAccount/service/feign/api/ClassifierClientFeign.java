@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
-@FeignClient(value = "classifierClientFeign")
+@FeignClient(value = "classifierClientFeign", url = "${urlClassifierClientFeign}")
 public interface ClassifierClientFeign {
 
     @GetMapping(value = "/operation/category/{uuid}")

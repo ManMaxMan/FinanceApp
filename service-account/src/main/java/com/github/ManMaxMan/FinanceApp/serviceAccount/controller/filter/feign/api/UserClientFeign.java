@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(value = "userClientFeign")
+@FeignClient(value = "userClientFeign", url = "${urlUserClientFeign}")
 public interface UserClientFeign {
 
     @GetMapping(produces = "application/json")

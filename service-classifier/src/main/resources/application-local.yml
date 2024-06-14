@@ -7,11 +7,5 @@ spring:
     username: FIN_classifier_service_app
     password: classifier
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          userClientFeign:
-            url: http://localhost:8080/cabinet/me
-          auditClientFeign:
-            url: http://localhost:8081/audit
+urlUserClientFeign: http://localhost:8080/cabinet/me
+urlAuditClientFeign: http://localhost:8080/audit
