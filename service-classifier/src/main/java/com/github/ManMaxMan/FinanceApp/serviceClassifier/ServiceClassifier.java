@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-import org.springframework.cloud.commons.httpclient.HttpClientConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -18,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @EnableConfigurationProperties({JWTProperty.class})
 @EnableFeignClients (basePackages = {"com.github.ManMaxMan.FinanceApp.serviceClassifier.service.feign.api","com.github.ManMaxMan.FinanceApp.serviceClassifier.controller.filter.feign.api"})
-@ImportAutoConfiguration({FeignAutoConfiguration.class, HttpClientConfiguration.class})
+//@ImportAutoConfiguration({FeignAutoConfiguration.class, HttpClientConfiguration.class})
 public class ServiceClassifier {
     public static void main(String[] args) {
         SpringApplication.run(ServiceClassifier.class, args);

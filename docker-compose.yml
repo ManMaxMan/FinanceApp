@@ -7,7 +7,7 @@ services:
     ports:
       - 81:8080
     networks:
-      - finance-network
+      - mynetwork
   pg_db:
     build: postgresql
     image: postgresql-finance:1.0.0
@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: finance_admin
       POSTGRES_PASSWORD: 123
     networks:
-      - finance-network
+      - mynetwork
   pgadmin:
     build: pgadmin
     image: pgadmin-finance:1.0.0
@@ -25,42 +25,62 @@ services:
     ports:
       - 82:80
     networks:
-      - finance-network
+      - mynetwork
   account-service:
     build: service-account
-    image: account-service:1.0.0
+    image: account-service:1.0.2
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg_db:5432/account_service
+      SPRING_DATASOURCE_USERNAME: FIN_account_service_app
+      SPRING_DATASOURCE_PASSWORD: account
     networks:
-      - finance-network
+      - mynetwork
+    depends_on:
+      - pg_db	
   audit-service:
     build: service-audit
-    image: audit-service:1.0.0
+    image: audit-service:1.0.2
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg_db:5432/audit_service
+      SPRING_DATASOURCE_USERNAME: FIN_audit_service_app
+      SPRING_DATASOURCE_PASSWORD: audit
     networks:
-      - finance-network
+      - mynetwork
+    depends_on:
+      - pg_db
   classifier-service:
     build: service-classifier
-    image: classifier-service:1.0.0
+    image: classifier-service:1.0.2
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg_db:5432/classifier_service
+      SPRING_DATASOURCE_USERNAME: FIN_classifier_service_app
+      SPRING_DATASOURCE_PASSWORD: classifier
     networks:
-      - finance-network
+      - mynetwork
+    depends_on:
+      - pg_db
   user-service:
     build: service-user
-    image: user-service:1.0.0
+    image: user-service:1.0.2
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg_db:5432/user_service
+      SPRING_DATASOURCE_USERNAME: FIN_user_service_app
+      SPRING_DATASOURCE_PASSWORD: user
     networks:
-      - finance-network
+      - mynetwork
+    depends_on:
+      - pg_db
   proxy:
     build: proxy
     image: proxy-finance:1.0.0
     ports:
       - 80:80
     networks:
-      - finance-network	  
+      - mynetwork	  
 
 networks:
-  finance-network:
+  mynetwork:

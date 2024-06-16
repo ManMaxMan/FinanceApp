@@ -3,6 +3,7 @@ server:
 
 spring:
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://pg_db:5432/audit_service
     username: FIN_audit_service_app
     password: audit

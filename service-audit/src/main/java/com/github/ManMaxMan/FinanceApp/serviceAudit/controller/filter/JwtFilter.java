@@ -71,8 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
         ResponseEntity<UserDTO> userDTOResponse = userClientFeign.
                 aboutUser("Bearer "+newToken);
 
-        if (userDTOResponse==null|| userDTOResponse.getBody()==null||
-                !userDTOResponse.getStatusCode().equals(HttpStatusCode.valueOf(200))){
+        if (userDTOResponse==null|| userDTOResponse.getBody()==null){
             chain.doFilter(request, response);
             return;
         }

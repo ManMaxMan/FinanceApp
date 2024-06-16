@@ -4,6 +4,7 @@ server:
 
 spring:
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://pg_db:5432/account_service
     username: FIN_account_service_app
     password: account
